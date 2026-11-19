@@ -37,7 +37,7 @@ import {
   PanelRight,
 } from "lucide-react";
 import Entry, { CaptainAccount, DownloadApp } from "./Entry";
-import { readProfile } from "./profile";
+import { readProfile, persistProfile, profileRPC } from "./profile";
 import VehiclePicker from "./VehiclePicker";
 import { resolveVehicle, initial, calc } from "./engine";
 import { native, Driver, useTracking } from "./tracking";
@@ -637,6 +637,13 @@ function App({ profile, changeProfile, showEntry }) {
           </div>
         </header>
         <main>
+          {profile && !profile.synced && (
+            <div className="pendingBanner" role="status">
+              <Info size={16} />
+              ملفك محفوظ على الجهاز فقط؛ لم تكتمل المزامنة.
+              <button onClick={() => M("profile")}>إعادة المحاولة</button>
+            </div>
+          )}
           <div className="intro">
             <div>
               <div className="overline">
@@ -1003,6 +1010,25 @@ function Root() {
   const [inside, open] = useState(
     () => !!readProfile() || sessionStorage.getItem("dp.guest") === "1",
   );
+  // Retry a previously consented, pending enrollment once on a new visit.
+  useEffect(() => {
+    let alive = true;
+    const p = readProfile();
+    if (p && !p.synced) {
+      profileRPC(p)
+        .then(() => {
+          if (alive && readProfile()?.device === p.device) {
+            const next = { ...p, synced: true };
+            persistProfile(next);
+            setProfile(next);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      alive = false;
+    };
+  }, []);
   function enter(p) {
     setProfile(p);
     if (!p) sessionStorage.setItem("dp.guest", "1");

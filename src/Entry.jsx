@@ -3,19 +3,12 @@ import {
   ArrowLeft,
   Check,
   Download,
-  LockKeyhole,
-  Radio,
   Route,
   ShieldCheck,
   Smartphone,
   UserRound,
 } from "lucide-react";
-import {
-  createProfile,
-  persistProfile,
-  readProfile,
-  profileRPC,
-} from "./profile";
+import { createProfile, persistProfile, profileRPC } from "./profile";
 import { native } from "./tracking";
 export function DownloadApp() {
   const [release, R] = useState(null);
@@ -276,7 +269,13 @@ export default function Entry({ enter }) {
           <span>
             <ShieldCheck size={15} /> بيانات الرحلات تبقى على جهازك
           </span>
-          <span className="mini-label">DRIVEPROFIT · CAPTAIN EDITION</span>
+          <a
+            className="catalogLink"
+            href="/vehicles_egypt.json"
+            download="vehicles_egypt.json"
+          >
+            قاعدة المركبات · JSON ↓
+          </a>
         </div>
       </main>
     </div>

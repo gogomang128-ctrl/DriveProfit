@@ -13,7 +13,16 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2011,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://nissan.drive.place/sunny/n16/group_sedan/600069",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "related_generation_1.6_MT"
+    }
   },
   {
     "id": "nissan_sunny_n17",
@@ -22,14 +31,24 @@
     "model": "صني N17 / Sunny N17",
     "engine_cc": 1498,
     "fuel_type": 92,
-    "liters_per_100km_city": 8.8,
-    "liters_per_100km_highway": 5.8,
-    "liters_per_100km_avg": 7.6,
-    "km_per_liter_avg": 13.16,
+    "liters_per_100km_city": 10.5,
+    "liters_per_100km_highway": 7,
+    "liters_per_100km_avg": 9.1,
+    "km_per_liter_avg": 10.99,
     "tank_capacity_liters": 41,
-    "reference_model_year": 2026,
+    "reference_model_year": 2020,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://nissanautoegypt.com/sunny-versions-and-specs/",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced",
+    "consumption_context_url": "https://newmina2020.blogspot.com/2020/03/2020-n17.html"
   },
   {
     "id": "nissan_sentra_b17",
@@ -45,7 +64,16 @@
     "tank_capacity_liters": 52,
     "reference_model_year": 2021,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://en.nissan.com.eg/vehicles/new/sentra/versions-and-specs.html",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "chevrolet_optra_j200",
@@ -54,14 +82,24 @@
     "model": "أوبترا J200 / Optra J200",
     "engine_cc": 1598,
     "fuel_type": 92,
-    "liters_per_100km_city": 11.0,
-    "liters_per_100km_highway": 6.8,
-    "liters_per_100km_avg": 9.32,
-    "km_per_liter_avg": 10.73,
+    "liters_per_100km_city": 11.5,
+    "liters_per_100km_highway": 9.0,
+    "liters_per_100km_avg": 10.5,
+    "km_per_liter_avg": 9.52,
     "tank_capacity_liters": 60,
     "reference_model_year": 2009,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "consumption_context_url": "https://eg.hatla2ee.com/en/review/chevrolet/optra/395",
+    "spec_reference": {
+      "url": "https://eg.hatla2ee.com/en/review/chevrolet/optra/395",
+      "fields": [
+        "transmission",
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "chevrolet_optra_15",
@@ -77,7 +115,15 @@
     "tank_capacity_liters": 54,
     "reference_model_year": 2017,
     "transmission": "6AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://egypt.yallamotor.com/new-cars/chevrolet/optra/2017/1-5l-standard",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "chevrolet_aveo_t250",
@@ -93,7 +139,15 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2016,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://egypt.yallamotor.com/new-cars/chevrolet/aveo/2015/1-4l-ls-automatic",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "chevrolet_lanos",
@@ -106,10 +160,18 @@
     "liters_per_100km_highway": 6.4,
     "liters_per_100km_avg": 8.32,
     "km_per_liter_avg": 12.02,
-    "tank_capacity_liters": 48,
-    "reference_model_year": 2015,
+    "tank_capacity_liters": 45,
+    "reference_model_year": 2020,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.carsprite.com/en/car-prices/chevrolet/lanos-2020",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "hyundai_accent_rb",
@@ -125,14 +187,21 @@
     "tank_capacity_liters": 43,
     "reference_model_year": 2023,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://hyundai-egypt.net/wp-content/uploads/2021/09/Accent-RB-BROCHURE.pdf",
+      "fields": [
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "hyundai_elantra_hd",
     "type": "car",
     "brand": "هيونداي / Hyundai",
     "model": "إلنترا HD / Elantra HD",
-    "engine_cc": 1599,
+    "engine_cc": 1591,
     "fuel_type": 92,
     "liters_per_100km_city": 9.9,
     "liters_per_100km_highway": 6.4,
@@ -141,7 +210,15 @@
     "tank_capacity_liters": 53,
     "reference_model_year": 2021,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://hyundai-egypt.net/wp-content/uploads/2022/02/Elantra-HD-Flyer.pdf",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "hyundai_elantra_ad",
@@ -157,14 +234,22 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2019,
     "transmission": "6AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://hyundai-egypt.net/wp-content/uploads/2024/10/ELANTRA-AD-brochure-.pdf",
+      "fields": [
+        "transmission"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "hyundai_elantra_cn7",
     "type": "car",
     "brand": "هيونداي / Hyundai",
-    "model": "إلنترا CN7 / Elantra CN7",
-    "engine_cc": 1598,
+    "model": "إلنترا CN7 جاما 1.6 / Elantra CN7 Gamma 1.6",
+    "engine_cc": 1591,
     "fuel_type": 92,
     "liters_per_100km_city": 8.9,
     "liters_per_100km_highway": 5.8,
@@ -173,7 +258,14 @@
     "tank_capacity_liters": 47,
     "reference_model_year": 2022,
     "transmission": "6AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.auto-data.net/en/hyundai-elantra-vii-cn7-1.6-gamma-128hp-automatic-40837",
+      "fields": [
+        "engine_cc"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "hyundai_verna_16",
@@ -189,7 +281,16 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2015,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/hyundai-verna/602cda63dd12a1b44f660145",
+      "fields": [
+        "tank_capacity_liters",
+        "fuel_type"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "toyota_corolla_e120",
@@ -205,7 +306,15 @@
     "tank_capacity_liters": 55,
     "reference_model_year": 2005,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.cars-directory.net/car-specs/toyota/corolla/corolla-ix-e120-e130-2818/1.6i-16v-110-hp-automatic-13624/",
+      "fields": [
+        "engine_cc"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "toyota_corolla_e140",
@@ -221,7 +330,16 @@
     "tank_capacity_liters": 55,
     "reference_model_year": 2012,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://analyticauto.com/all/toyota/corolla/toyota-corolla-x-e140-e150-/1-6-i-16v-vvt-i-124-hp-mmt",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "related_generation_MMT_not_4AT"
+    }
   },
   {
     "id": "toyota_corolla_e170",
@@ -237,7 +355,15 @@
     "tank_capacity_liters": 55,
     "reference_model_year": 2017,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://eg.hatla2ee.com/en/review/toyota/corolla/384",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "toyota_corolla_e210",
@@ -253,7 +379,15 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2026,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://egypt.yallamotor.com/ar/new-cars/toyota/corolla/2020/1-6l-active-plus",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "toyota_yaris_xp90",
@@ -269,7 +403,17 @@
     "tank_capacity_liters": 42,
     "reference_model_year": 2008,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.car-specs.za.net/toyota/yaris-sedan/1-3-t3plus-sedan-at-november-2008/",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters",
+        "transmission"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "suzuki_dzire_12",
@@ -285,7 +429,15 @@
     "tank_capacity_liters": 37,
     "reference_model_year": 2021,
     "transmission": "AMT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://eg.hatla2ee.com/en/new-car/suzuki/swift-dzire/25420",
+      "fields": [
+        "fuel_type",
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "suzuki_ciaz_15",
@@ -301,7 +453,16 @@
     "tank_capacity_liters": 43,
     "reference_model_year": 2022,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://kbgeneralimportexport.com/wp-content/uploads/2024/03/Suzuki-Ciaz-Brochure-Spec.pdf",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "suzuki_swift_12",
@@ -317,7 +478,16 @@
     "tank_capacity_liters": 37,
     "reference_model_year": 2021,
     "transmission": "AMT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.cars24.com/new-cars/maruti-suzuki/swift-2021-2023/specifications/",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "suzuki_alto_800",
@@ -333,7 +503,15 @@
     "tank_capacity_liters": 35,
     "reference_model_year": 2019,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.carsprite.com/en/car-prices/suzuki/alto-2020",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "suzuki_spresso_10",
@@ -349,7 +527,15 @@
     "tank_capacity_liters": 27,
     "reference_model_year": 2021,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://suzuki.cfaomotors-ghana.com/en/range/suzuki-ghana-cfao-motors/spresso",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "kia_cerato_td",
@@ -365,7 +551,15 @@
     "tank_capacity_liters": 52,
     "reference_model_year": 2010,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.carsales.com.au/research/kia/cerato/2010/si/",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "related_TD_sedan_not_Egypt_powertrain"
+    }
   },
   {
     "id": "kia_cerato_yd",
@@ -381,7 +575,16 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2016,
     "transmission": "6AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.ccarprice.com/eg/kia-cerato-1-6l-base-price-in-egypt-188",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "kia_rio_ub",
@@ -397,7 +600,16 @@
     "tank_capacity_liters": 43,
     "reference_model_year": 2015,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://motoreu.com/kia-rio-1.4-mpg-fuel-consumption-technical-specifications-164067",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "related_generation_hatchback"
+    }
   },
   {
     "id": "kia_picanto_ta",
@@ -413,7 +625,16 @@
     "tank_capacity_liters": 35,
     "reference_model_year": 2015,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/kia-picanto/602cda63dd12a1b44f65fd12",
+      "fields": [
+        "tank_capacity_liters",
+        "fuel_type"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "renault_logan_ii",
@@ -429,7 +650,14 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2020,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.carsprite.com/en/car-prices/renault/logan-2020",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "renault_sandero_stepway",
@@ -445,7 +673,14 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2020,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.carsprite.com/en/car-prices/renault/sandero-stepway-2019",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "renault_megane_iv",
@@ -453,7 +688,7 @@
     "brand": "رينو / Renault",
     "model": "ميجان سيدان الجيل الرابع / Megane IV Sedan",
     "engine_cc": 1598,
-    "fuel_type": 95,
+    "fuel_type": 92,
     "liters_per_100km_city": 9.2,
     "liters_per_100km_highway": 6.0,
     "liters_per_100km_avg": 7.92,
@@ -461,7 +696,17 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2021,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://eg.hatla2ee.com/en/new-car/renault/megane/24540",
+      "fields": [
+        "tank_capacity_liters",
+        "fuel_type",
+        "transmission"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "renault_taliant_tce",
@@ -477,7 +722,16 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2025,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://ellaithy.com.eg/en/new-cars/renault-taliant-2/",
+      "fields": [
+        "transmission",
+        "fuel_type",
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "mitsubishi_lancer_cs3",
@@ -493,7 +747,14 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2008,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://wagizaa.blogspot.com/2020/07/MITSUBISHI-LANSER-2000-2015.html",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "mitsubishi_lancer_ex",
@@ -509,7 +770,15 @@
     "tank_capacity_liters": 59,
     "reference_model_year": 2016,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/mitsubishi-lancer/602cda63dd12a1b44f65fdbd",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "mitsubishi_attrage",
@@ -525,7 +794,15 @@
     "tank_capacity_liters": 42,
     "reference_model_year": 2024,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://ksa.icartea.com/en/newcars/mitsubishi/attrage/specifications-comparison?trimSlug=mitsubishi-attrage-2024-1-2-glx-hl-2024",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "fiat_tipo_14_mt",
@@ -541,7 +818,15 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2020,
     "transmission": "6MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://al-ain.com/article/fiat-tipo-manual-return-egyptian-market",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "fiat_tipo_16_at",
@@ -549,7 +834,7 @@
     "brand": "فيات / Fiat",
     "model": "تيبو أوتوماتيك / Tipo 1.6 Automatic",
     "engine_cc": 1598,
-    "fuel_type": 95,
+    "fuel_type": 92,
     "liters_per_100km_city": 10.0,
     "liters_per_100km_highway": 6.3,
     "liters_per_100km_avg": 8.52,
@@ -557,7 +842,16 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2021,
     "transmission": "6AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/fiat-tipo/602cda63dd12a1b44f6602cd",
+      "fields": [
+        "fuel_type",
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "fiat_grande_punto_14",
@@ -573,7 +867,16 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2010,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://motoreu.com/fiat-grande-punto-1.4-8v-mpg-fuel-consumption-technical-specifications-167948",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "international_powertrain"
+    }
   },
   {
     "id": "fiat_shahin_16",
@@ -589,7 +892,16 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2006,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://eqrae.com/%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC-%D8%AD%D8%B3%D8%A7%D8%A8-%D8%A7%D9%84%D8%A8%D9%86%D8%B2%D9%8A%D9%86/",
+      "fields": [
+        "transmission",
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "lada_granta_16",
@@ -597,7 +909,7 @@
     "brand": "لادا / Lada",
     "model": "جرانتا 1.6 / Granta 1.6",
     "engine_cc": 1596,
-    "fuel_type": 95,
+    "fuel_type": 92,
     "liters_per_100km_city": 10.0,
     "liters_per_100km_highway": 6.5,
     "liters_per_100km_avg": 8.6,
@@ -605,23 +917,39 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2021,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/lada-granta/602cda63dd12a1b44f6604b6",
+      "fields": [
+        "fuel_type",
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "byd_f3_15_mt",
     "type": "car",
     "brand": "بي واي دي / BYD",
     "model": "إف 3 / F3 1.5 Manual",
-    "engine_cc": 1488,
+    "engine_cc": 1497,
     "fuel_type": 92,
     "liters_per_100km_city": 9.0,
     "liters_per_100km_highway": 6.0,
     "liters_per_100km_avg": 7.8,
     "km_per_liter_avg": 12.82,
     "tank_capacity_liters": 50,
-    "reference_model_year": 2022,
+    "reference_model_year": 2025,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/byd-f3/9031a34743c0",
+      "fields": [
+        "engine_cc"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "byd_l3_15",
@@ -637,7 +965,16 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2016,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://bydegypt.com/wp-content/uploads/2022/01/L3_Cataloge.pdf",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "chery_arrizo_5",
@@ -653,7 +990,16 @@
     "tank_capacity_liters": 48,
     "reference_model_year": 2022,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.chery-eg.com/en/car/arrizo-5",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "chery_tiggo_3",
@@ -666,10 +1012,18 @@
     "liters_per_100km_highway": 7.3,
     "liters_per_100km_avg": 9.58,
     "km_per_liter_avg": 10.44,
-    "tank_capacity_liters": 57,
+    "tank_capacity_liters": 55,
     "reference_model_year": 2022,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/chery-tiggo_3/602cda63dd12a1b44f6603fa",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "chery_tiggo_7",
@@ -685,7 +1039,14 @@
     "tank_capacity_liters": 57,
     "reference_model_year": 2022,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.chery-eg.com/en/car/tiggo-7",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "chery_tiggo_8",
@@ -701,7 +1062,14 @@
     "tank_capacity_liters": 51,
     "reference_model_year": 2022,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.chery-eg.com/en/car/tiggo-8",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "mg_5_15",
@@ -717,7 +1085,15 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2022,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.mgmotor.com.eg/model/mg5/",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "mg_6_15t",
@@ -733,7 +1109,15 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2021,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://mgmotor.com.eg/model/mg6/?amp=",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "mg_zs_15",
@@ -749,7 +1133,15 @@
     "tank_capacity_liters": 48,
     "reference_model_year": 2022,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.mgmotor.com.eg/model/zs/",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "mg_rx5_15t",
@@ -765,7 +1157,15 @@
     "tank_capacity_liters": 55,
     "reference_model_year": 2021,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.mgmotor.com.eg/model/rx5/luxury/",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "dongfeng_shine_sport",
@@ -781,7 +1181,15 @@
     "tank_capacity_liters": 47,
     "reference_model_year": 2025,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://eg.hatla2ee.com/en/new-car/dfm/Shine/50738",
+      "fields": [
+        "fuel_type",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "geely_emgrand_7",
@@ -797,7 +1205,16 @@
     "tank_capacity_liters": 50,
     "reference_model_year": 2019,
     "transmission": "5MT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.carsprite.com/en/car-prices/geely/emgrand-7-2019",
+      "fields": [
+        "engine_cc",
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "geely_coolray_sx11",
@@ -813,7 +1230,17 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2022,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/geely-coolray/61b76f401432f32a4dfa3c0c",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission",
+        "fuel_type"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "changan_alsvin_15",
@@ -829,7 +1256,14 @@
     "tank_capacity_liters": 45,
     "reference_model_year": 2022,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://egypt.yallamotor.com/ar/new-cars/changan/alsvin/2022/1-5l-l3",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "changan_eado_dt",
@@ -842,10 +1276,18 @@
     "liters_per_100km_highway": 6.3,
     "liters_per_100km_avg": 8.28,
     "km_per_liter_avg": 12.08,
-    "tank_capacity_liters": 45,
+    "tank_capacity_liters": 52,
     "reference_model_year": 2022,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/changan-eado/60b90315dd732609b42a6bce",
+      "fields": [
+        "tank_capacity_liters",
+        "fuel_type"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "changan_eado_plus",
@@ -861,7 +1303,15 @@
     "tank_capacity_liters": 51,
     "reference_model_year": 2026,
     "transmission": "DCT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_review_status": "partially_referenced",
+    "spec_reference": {
+      "url": "https://www.contactcars.com/en/new-cars/changan-eado_plus/8ad2cc92df5d",
+      "fields": [
+        "tank_capacity_liters"
+      ],
+      "scope": "egypt_model_family"
+    }
   },
   {
     "id": "proton_saga_13",
@@ -877,7 +1327,14 @@
     "tank_capacity_liters": 40,
     "reference_model_year": 2022,
     "transmission": "4AT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://al-ain.com/article/price-proton-saga-2022-egypt-latest-increase",
+      "fields": [
+        "tank_capacity_liters"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   },
   {
     "id": "baic_u5_plus",
@@ -893,6 +1350,14 @@
     "tank_capacity_liters": 48,
     "reference_model_year": 2026,
     "transmission": "CVT",
-    "consumption_basis": "planning_estimate_60pct_city_distance"
+    "consumption_basis": "planning_estimate_60pct_city_distance",
+    "spec_reference": {
+      "url": "https://autozone-mag.com/news/9160/asaaar-o-moasfat-bayk-u5-bls-algdyd-fy-msr-bnskh-khrbayy-balkaml",
+      "fields": [
+        "tank_capacity_liters",
+        "transmission"
+      ]
+    },
+    "spec_review_status": "partially_referenced"
   }
 ]

@@ -46,7 +46,14 @@ export function persistProfile(p) {
   if (p) localStorage.setItem(store, JSON.stringify(p));
   else localStorage.removeItem(store);
 }
-export async function profileRPC(p, erase = false) {
+// Serialize mutations from this tab: an in-flight retry must finish before an erase.
+let tail = Promise.resolve();
+export function profileRPC(p, erase = false) {
+  const operation = tail.then(() => request(p, erase));
+  tail = operation.catch(() => {});
+  return operation;
+}
+async function request(p, erase) {
   const ac = new AbortController(),
     timer = setTimeout(() => ac.abort(), 8000);
   try {

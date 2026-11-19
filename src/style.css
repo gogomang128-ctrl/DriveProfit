@@ -1636,3 +1636,22 @@ a {
     flex-shrink: 0;
   }
 }
+.pendingBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  padding: 7px 10px;
+  border: 1px solid #57482e;
+  border-radius: 7px;
+  background: #30291c;
+  color: #e8c891;
+  font-size: 12px;
+}
+.pendingBanner button,
+.catalogLink {
+  color: var(--lime);
+  text-decoration: underline;
+  font-size: 11px;
+}
