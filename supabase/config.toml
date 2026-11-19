@@ -1,0 +1,3 @@
+[functions.egypt-fuel-prices]
+verify_jwt = false
+entrypoint = "./functions/egypt-fuel-prices/index.js"

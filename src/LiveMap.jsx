@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { regionalLayer } from "./maps/offline";
+import { streetLayer } from "./maps/streets";
 import { Plus, Minus, LocateFixed } from "lucide-react";
 export default function LiveMap({ point, route }) {
   const root = useRef(null),
@@ -9,29 +11,43 @@ export default function LiveMap({ point, route }) {
     mark = useRef(),
     follow = useRef(true),
     first = useRef(point);
-  const [failed, F] = useState(false),
+  const [base, setBase] = useState("loading"),
     [following, followState] = useState(true);
   useEffect(() => {
     const map = L.map(root.current, {
       zoomControl: false,
       scrollWheelZoom: false,
       preferCanvas: true,
-    }).setView(first.current || [30.0444, 31.2357], first.current ? 15 : 12);
+      minZoom: 5,
+      maxZoom: 19,
+    }).setView(first.current || [30.0444, 31.2357], first.current ? 15 : 9);
     m.current = map;
-    const tiles = L.tileLayer(
-      "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        maxZoom: 19,
-        keepBuffer: 1,
-        updateWhenIdle: true,
-        attribution:
-          '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      },
-    );
-    tiles
-      .on("tileerror", () => F(true))
-      .on("tileload", () => F(false))
-      .addTo(map);
+    const regional = regionalLayer(map).addTo(map);
+    map.attributionControl.addAttribution("Natural Earth");
+    L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
+    const ac = new AbortController();
+    let streets;
+    const fallback = () => {
+      if (ac.signal.aborted) return;
+      ac.abort();
+      streets?.off();
+      if (streets && map.hasLayer(streets)) map.removeLayer(streets);
+      regional.addTo(map);
+      setBase("offline");
+    };
+    const timer = setTimeout(fallback, 8000);
+    streetLayer(ac.signal)
+      .then((layer) => {
+        if (ac.signal.aborted) return;
+        streets = layer;
+        layer.once("tileload", () => {
+          clearTimeout(timer);
+          setBase("online");
+          regional.remove();
+        });
+        layer.once("tileerror", fallback).addTo(map);
+      })
+      .catch(fallback);
     line.current = L.polyline([], { color: "#99bf45", weight: 4 }).addTo(map);
     mark.current = L.circleMarker([0, 0], {
       radius: 7,
@@ -50,7 +66,9 @@ export default function LiveMap({ point, route }) {
     }
     return () => {
       resize?.disconnect();
-      tiles.off();
+      clearTimeout(timer);
+      ac.abort();
+      streets?.off();
       map.remove();
       m.current = null;
     };
@@ -59,7 +77,11 @@ export default function LiveMap({ point, route }) {
     if (!point || !m.current) return;
     mark.current.setLatLng(point).addTo(m.current);
     line.current.setLatLngs(route);
-    if (follow.current) m.current.panTo(point, { animate: false });
+    if (follow.current) {
+      if (!first.current) m.current.setView(point, 15, { animate: false });
+      else m.current.panTo(point, { animate: false });
+    }
+    first.current = point;
   }, [point, route]);
   return (
     <>
@@ -77,15 +99,17 @@ export default function LiveMap({ point, route }) {
           onClick={() => {
             follow.current = true;
             followState(true);
-            m.current?.setView(point || [30.0444, 31.2357], point ? 15 : 12);
+            m.current?.setView(point || [30.0444, 31.2357], point ? 15 : 9);
           }}
         >
           <LocateFixed />
         </button>
       </div>
-      {failed && (
+      {base !== "online" && (
         <span className="mapCity offline">
-          الخلفية غير متاحة · لا يتوقف حساب المسافة
+          {base === "loading"
+            ? "تحميل تفاصيل الشوارع…"
+            : "خريطة إقليمية دون إنترنت · تفاصيل الشوارع غير متاحة"}
         </span>
       )}
     </>

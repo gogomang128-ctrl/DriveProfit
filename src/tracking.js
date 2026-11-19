@@ -7,6 +7,7 @@ const blank = { km: 0, speed: 0, point: null, route: [], active: false };
 export function useTracking() {
   const [trip, set] = useState(blank),
     [error, err] = useState(""),
+    [gpsDisabled, setGpsDisabled] = useState(false),
     [pending, wait] = useState(false);
   const watch = useRef(null),
     ref = useRef(blank);
@@ -38,13 +39,15 @@ export function useTracking() {
   async function start(settings) {
     err("");
     wait(true);
+    setGpsDisabled(false);
     try {
       if (native) {
         await Driver.start({ settings });
         update({ ...blank, active: true });
         return true;
       }
-      if (!navigator.geolocation) throw Error();
+      if (!window.isSecureContext || !navigator.geolocation)
+        throw Error("unsupported");
       const opts = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
       const fix = await new Promise((ok, no) =>
         navigator.geolocation.getCurrentPosition(ok, no, opts),
@@ -81,8 +84,17 @@ export function useTracking() {
       );
       return true;
     } catch (e) {
+      setGpsDisabled(e?.message === "GPS disabled");
       err(
-        "تعذّر بدء التتبّع. فعّل GPS واسمح بالموقع الدقيق، وبإشعار الرحلة على أندرويد، ثم أعد المحاولة.",
+        e?.message === "unsupported"
+          ? "الموقع غير متاح هنا. افتح التطبيق عبر HTTPS في متصفح مستقل أو استخدم نسخة أندرويد."
+          : e?.code === 1 || e?.message === "Precise location required"
+            ? "لم يُسمح بالموقع. فعّل إذن الموقع الدقيق من إعدادات التطبيق أو الموقع، ثم أعد المحاولة."
+            : e?.code === 3
+              ? "انتهت مهلة تحديد الموقع. انتقل إلى مكان مكشوف وأعد المحاولة."
+              : e?.code === 2 || e?.message === "GPS disabled"
+                ? "تعذّر تحديد الموقع. شغّل خدمة الموقع GPS في الجهاز ثم أعد المحاولة."
+                : "تعذّر بدء التتبّع. فعّل GPS واسمح بالموقع الدقيق، وبإشعار الرحلة على أندرويد، ثم أعد المحاولة.",
       );
       return false;
     } finally {
@@ -100,5 +112,5 @@ export function useTracking() {
     update({ ...ref.current, active: false, speed: 0 });
     return ref.current;
   }
-  return { trip, start, stop, error, pending };
+  return { trip, start, stop, error, pending, gpsDisabled };
 }

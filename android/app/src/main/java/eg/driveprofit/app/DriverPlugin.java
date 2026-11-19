@@ -52,6 +52,16 @@ public class DriverPlugin extends Plugin {
   }
 
   @PluginMethod
+  public void openLocationSettings(PluginCall call) {
+    try {
+      getActivity().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+      call.resolve();
+    } catch (RuntimeException e) {
+      call.reject("Cannot open location settings");
+    }
+  }
+
+  @PluginMethod
   public void start(PluginCall call) {
     if (getPermissionState("gps") != PermissionState.GRANTED) {
       requestPermissionForAlias("gps", call, "gpsReady");

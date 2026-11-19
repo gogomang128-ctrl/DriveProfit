@@ -27,7 +27,64 @@ try {
     erased++;
     return r.fulfill({ contentType: "application/json", body: "true" });
   });
-  await p.route("https://tile.openstreetmap.org/**", (r) => r.abort());
+  p.on("request", (r) => {
+    if (r.url().includes("tile.openstreetmap.org"))
+      errors.push("Unexpected volunteer tile request");
+  });
+  await p.route("https://tiles.openfreemap.org/**", (r) =>
+    r.fulfill({ status: 403, body: "Forbidden" }),
+  );
+  await p.route("**/functions/v1/egypt-fuel-prices", (r) =>
+    r.fulfill({
+      json: {
+        asOf: new Date().toISOString().slice(0, 10),
+        checkedAt: new Date().toISOString(),
+        source: "https://www.petroleum.gov.eg/ar-eg/Pages/HomePage.aspx",
+        currency: "EGP",
+        prices: { 80: 20.75, 92: 22.25, 95: 24 },
+      },
+    }),
+  );
+  const restricted = await b.newPage();
+  restricted.on("pageerror", (e) => errors.push(String(e)));
+  await restricted.addInitScript(() => {
+    for (const name of ["sessionStorage", "localStorage"]) {
+      Object.defineProperty(window, name, {
+        get() {
+          throw new DOMException("Blocked", "SecurityError");
+        },
+      });
+    }
+  });
+  await restricted.goto(base);
+  await restricted.getByRole("button", { name: "استكشف كضيف" }).click();
+  await restricted.getByRole("heading", { name: "لوحة القيادة" }).waitFor();
+  await restricted.getByText(/التخزين غير متاح/).waitFor();
+  await restricted.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      value: {
+        getCurrentPosition: (_ok, no) => {
+          window.permissionAsked = true;
+          no({ code: 1 });
+        },
+      },
+    });
+  });
+  await restricted.reload();
+  await restricted.getByRole("button", { name: "استكشف كضيف" }).click();
+  await restricted.getByRole("button", { name: "بدء رحلة جديدة" }).click();
+  assert.equal(
+    await restricted.evaluate(() => !!window.permissionAsked),
+    false,
+  );
+  await restricted
+    .getByRole("button", { name: "السماح بالموقع وبدء التتبّع" })
+    .click();
+  await restricted
+    .getByRole("dialog")
+    .getByText(/لم يُسمح بالموقع/)
+    .waitFor();
+  await restricted.close();
   await p.goto(base);
   await p.evaluate(() => document.fonts.ready);
   await p.getByLabel("اسم الكابتن").fill("اختبار تجريبي");
@@ -38,7 +95,17 @@ try {
   assert.equal(registered, 1);
   await p.reload();
   await p.getByRole("heading", { name: "لوحة القيادة" }).waitFor();
+  await p.getByText(/آخر تحقق:/).waitFor();
   await p.getByRole("button", { name: "تغيير المركبة" }).click();
+  assert.equal(
+    await p.locator('select option[value="fiat_tipo_14_mt"]').count(),
+    0,
+  );
+  await p.getByRole("button", { name: "سيارات", exact: true }).click();
+  assert.equal(
+    await p.locator('select option[value="vigorey_vlr_200"]').count(),
+    0,
+  );
   await p.getByRole("searchbox").fill("تيبو");
   await p.getByLabel("المركبة والفئة").selectOption("fiat_tipo_14_mt");
   await p.getByRole("button", { name: /زحام/ }).click();
@@ -55,6 +122,7 @@ try {
   );
   await p.getByRole("button", { name: "عرض الخريطة" }).click();
   await p.locator(".leaflet-container").waitFor();
+  await p.getByText(/خريطة إقليمية دون إنترنت/).waitFor();
   await p.getByRole("button", { name: "تكبير الخريطة" }).click();
   await p.waitForTimeout(400);
   await p.getByRole("button", { name: "تصغير الخريطة" }).click();
@@ -122,7 +190,8 @@ try {
     });
   });
   await p.reload();
-  await p.getByRole("button", { name: "بدء رحلة جديدة" }).click();
+  await p.getByRole("button", { name: "عرض الخريطة" }).click();
+  await p.getByRole("button", { name: "تفعيل GPS وبدء التتبّع" }).click();
   await p.getByRole("button", { name: "السماح بالموقع وبدء التتبّع" }).click();
   await p.getByRole("button", { name: "إنهاء الرحلة", exact: true }).click();
   await p.getByRole("dialog").getByRole("spinbutton").fill("100");
@@ -135,7 +204,9 @@ try {
   assert.ok(saved.km > 0.1 && saved.km < 0.12);
   assert.ok(Math.abs(saved.liters - saved.km * 0.08) < 1e-8);
   assert.equal(errors.length, 0, errors.join("\n"));
-  console.log("PASS: GPS trace and measured fuel consumption saved");
+  console.log(
+    "PASS: GPS trace and trip fuel estimate from calibrated consumption saved",
+  );
 } finally {
   await b?.close();
   await new Promise((done) => server.httpServer.close(done));

@@ -1,3 +1,4 @@
+import reference from "../public/data/fuel-eg.json" with { type: "json" };
 import records from "../vehicles_egypt.json" with { type: "json" };
 export const vehicles = [
   {
@@ -34,6 +35,7 @@ const catalog = records.map((r) => ({
   tank: r.tank_capacity_liters,
   year: r.reference_model_year,
   gear: r.transmission,
+  spec: r.spec_reference,
 }));
 vehicles.push(
   ...["nissan_sunny_n17", "toyota_corolla_e210"].map((id) =>
@@ -54,7 +56,9 @@ export const initial = {
   vehicle: 0,
   grade: 92,
   rate: 3,
-  prices: { 80: 20.75, 92: 22.25, 95: 24 },
+  prices: reference.prices,
+  source: reference.source,
+  asOf: reference.asOf,
   wear: 5,
   speed: 80,
   tank: 8,

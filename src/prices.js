@@ -1,4 +1,4 @@
-export function validFeed(feed, since = "2026-11-17") {
+export function validFeed(feed, since = "2026-11-19") {
   if (
     !feed ||
     feed.currency !== "EGP" ||
@@ -26,9 +26,11 @@ export function validFeed(feed, since = "2026-11-17") {
   );
 }
 export async function fetchPrices(since) {
-  const endpoint = import.meta.env.VITE_FUEL_FEED_URL || "/data/fuel-eg.json";
+  const endpoint =
+    import.meta.env.VITE_FUEL_FEED_URL ||
+    "https://dwxsofojrfmbmmqluesq.supabase.co/functions/v1/egypt-fuel-prices";
   const controller = new AbortController(),
-    timeout = setTimeout(() => controller.abort(), 6500);
+    timeout = setTimeout(() => controller.abort(), 10000);
   try {
     const res = await fetch(endpoint, {
       cache: "no-store",
@@ -36,9 +38,19 @@ export async function fetchPrices(since) {
     });
     if (!res.ok) throw Error();
     const feed = await res.json();
-    if (!validFeed(feed, since)) throw Error();
+    if (!validFeed(feed, since) || !freshCheck(feed)) throw Error();
     return feed;
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export function freshCheck(feed, now = Date.now()) {
+  const t = Date.parse(feed?.checkedAt);
+  return (
+    Number.isFinite(t) &&
+    t <= now + 60000 &&
+    now - t <= 300000 &&
+    feed.asOf === new Date(t).toISOString().slice(0, 10)
+  );
 }

@@ -205,7 +205,7 @@ function CalculatorCard({ s }) {
     </section>
   );
 }
-function FuelCard({ s, edit }) {
+function FuelCard({ s, edit, feedState }) {
   return (
     <section className="card fuel">
       <div className="cardTitle">
@@ -240,16 +240,11 @@ function FuelCard({ s, edit }) {
         <span>
           <Clock3 size={12} />
           {s.updated
-            ? "تعديل يدوي"
-            : "مرجع: " +
-              new Date(
-                (s.asOf || "2026-11-17") + "T12:00:00",
-              ).toLocaleDateString("ar-EG", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                numberingSystem: "latn",
-              })}
+            ? "سعر يدوي"
+            : (feedState === "offline" ? "تعذّر التحديث · " : "") +
+              (s.checkedAt
+                ? "آخر تحقق: " + new Date(s.checkedAt).toLocaleString("ar-EG")
+                : "مرجع محفوظ: " + (s.asOf || "2026-11-17"))}
         </span>
         <button onClick={edit}>
           <Pencil size={12} />
@@ -295,7 +290,12 @@ function VehicleCard({ s, edit }) {
       <div className="heroFoot">
         <span>
           <Fuel />
-          الاستهلاك <b>{nf(s.rate, 2)}</b> لتر / 100 كم
+          {s.mode === "measured"
+            ? "معدل من التفويل"
+            : s.mode === "manual"
+              ? "معدل يدوي"
+              : "معدل تقديري"}{" "}
+          <b>{nf(s.rate, 2)}</b> لتر / 100 كم
         </span>
         <i />
         <span>
@@ -306,30 +306,19 @@ function VehicleCard({ s, edit }) {
     </section>
   );
 }
-const charts = [
-  "0,30 10,24 21,27 31,19 45,21 54,14 66,18 77,10 86,13 100,2",
-  "0,28 10,27 20,20 32,22 41,15 50,19 62,12 75,14 85,8 100,6",
-  "0,31 12,30 21,24 32,24 40,18 51,19 60,13 69,14 78,8 87,11 100,3",
-  "0,28 10,28 19,18 28,18 39,23 49,14 59,15 70,8 79,11 90,7 100,7",
-];
 function Stats({ list, range, setRange }) {
-  let demo = !list.length;
   const rows = list.filter(
     (x) =>
       Date.now() - x.at < (range === "اليوم" ? 1 : 7) * 86400000 &&
       (range !== "اليوم" ||
         new Date(x.at).toDateString() === new Date().toDateString()),
   );
-  let vals = demo
-    ? range === "اليوم"
-      ? [342.5, 12, 86.4, 2.59]
-      : [1964, 71, 507.2, 15.22]
-    : [
-        rows.reduce((a, x) => a + x.net, 0),
-        rows.length,
-        rows.reduce((a, x) => a + x.km, 0),
-        rows.reduce((a, x) => a + x.liters, 0),
-      ];
+  const vals = [
+    rows.reduce((a, x) => a + x.net, 0),
+    rows.length,
+    rows.reduce((a, x) => a + x.km, 0),
+    rows.reduce((a, x) => a + x.liters, 0),
+  ];
   return (
     <>
       <div className="sectionBar">
@@ -337,7 +326,7 @@ function Stats({ list, range, setRange }) {
           <span className="slash">//</span>ملخّص الأداء
         </h3>
         <div className="range">
-          {demo && <small>بيانات توضيحية</small>}
+          {!rows.length && <small>لا توجد رحلات مسجّلة لهذه الفترة</small>}
           <select
             aria-label="فترة ملخّص الأداء"
             value={range}
@@ -353,7 +342,7 @@ function Stats({ list, range, setRange }) {
           [Wallet, "صافي الربح", "ج.م", "#b6e858"],
           [Flag, "عدد الرحلات", "رحلة", "#80b6ff"],
           [Route, "المسافة المقطوعة", "كم", "#b698f5"],
-          [Fuel, "الوقود المستهلك", "لتر", "#f1ae66"],
+          [Fuel, "الوقود المقدّر", "لتر", "#f1ae66"],
         ].map(([Icon, title, unit, color], i) => (
           <div key={title} className="stat card" style={{ "--accent": color }}>
             <div className="statTitle">
@@ -366,39 +355,38 @@ function Stats({ list, range, setRange }) {
               <bdi>{nf(vals[i], 2)}</bdi>
               <small>{unit}</small>
             </div>
-            {demo && (
-              <svg viewBox="0 0 100 40" className="spark" aria-hidden="true">
-                <defs>
-                  <linearGradient id={"g" + i} x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity=".2" />
-                    <stop offset="100%" stopColor={color} stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <polygon
-                  points={`${charts[i]} 100,40 0,40`}
-                  fill={`url(#g${i})`}
-                />
-                <polyline
-                  points={charts[i]}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
           </div>
         ))}
       </div>
     </>
   );
 }
+// Embedded previews may deny access even to the storage getter itself.
+function guestFlag(value) {
+  try {
+    if (value === undefined) return sessionStorage.getItem("dp.guest") === "1";
+    if (value) sessionStorage.setItem("dp.guest", "1");
+    else sessionStorage.removeItem("dp.guest");
+  } catch {
+    /* React state still supports guest use for this visit. */
+  }
+  return false;
+}
 function App({ profile, changeProfile, showEntry }) {
+  const [temporary, setTemporary] = useState(false);
+  function saveLocally(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      setTemporary(true);
+    }
+  }
   const [page, P] = useState("dash"),
     [modal, M] = useState(""),
     [mobile, U] = useState(false),
     [s, S] = useState(() => load("dp.settings", initial)),
     [draft, D] = useState(s),
+    [feedState, setFeedState] = useState("loading"),
     [list, H] = useState(() => load("dp.history", [])),
     [range, G] = useState("اليوم"),
     [fare, F] = useState(""),
@@ -411,24 +399,41 @@ function App({ profile, changeProfile, showEntry }) {
   const notices = useRef({});
   const close = () => M("");
   useEffect(() => {
-    let alive = true;
-    fetchPrices(s.asOf)
-      .then((feed) => {
-        if (alive)
-          S((old) =>
-            old.updated
-              ? old
-              : {
-                  ...old,
-                  prices: feed.prices,
-                  asOf: feed.asOf,
-                  source: feed.source,
-                },
-          );
-      })
-      .catch(() => {});
+    let alive = true,
+      busy = false;
+    async function refresh() {
+      if (document.hidden || busy) return;
+      busy = true;
+      try {
+        const feed = await fetchPrices();
+        if (!alive) return;
+        S((old) =>
+          old.updated || old.asOf > feed.asOf || old.checkedAt >= feed.checkedAt
+            ? old
+            : {
+                ...old,
+                prices: feed.prices,
+                asOf: feed.asOf,
+                source: feed.source,
+                checkedAt: feed.checkedAt,
+              },
+        );
+        setFeedState("ok");
+      } catch {
+        if (alive) setFeedState("offline");
+      } finally {
+        busy = false;
+      }
+    }
+    refresh();
+    const timer = setInterval(refresh, 60000);
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("online", refresh);
     return () => {
       alive = false;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("online", refresh);
     };
   }, []);
   function note(t) {
@@ -451,14 +456,14 @@ function App({ profile, changeProfile, showEntry }) {
     }
   }
   useEffect(() => {
-    localStorage.setItem("dp.settings", JSON.stringify(s));
+    saveLocally("dp.settings", s);
     if (native)
       Driver.configure({ settings: s }).catch(() =>
         note("تعذّر تحديث إعدادات الفقاعة"),
       );
   }, [s]);
   useEffect(() => {
-    localStorage.setItem("dp.history", JSON.stringify(list));
+    saveLocally("dp.history", list);
   }, [list]);
   useEffect(() => {
     if (!trip.active) return;
@@ -498,20 +503,50 @@ function App({ profile, changeProfile, showEntry }) {
         Object.entries(draft.prices).map(([k, v]) => [k, +v]),
       ),
     };
-    if (
-      modal === "fuel" &&
-      JSON.stringify(d.prices) !== JSON.stringify(s.prices)
-    )
-      d.updated = Date.now();
-    S(d);
+    S((old) =>
+      modal === "fuel"
+        ? draft.priceEdited
+          ? { ...old, prices: d.prices, updated: Date.now() }
+          : old
+        : modal === "vehicle"
+          ? {
+              ...old,
+              vehicleRates: {
+                ...old.vehicleRates,
+                [resolveVehicle(old.vehicle).id]: {
+                  rate: old.rate,
+                  mode: old.mode,
+                  grade: old.grade,
+                },
+                [resolveVehicle(d.vehicle).id]: {
+                  rate: d.rate,
+                  mode: d.mode,
+                  grade: d.grade,
+                },
+              },
+              vehicle: d.vehicle,
+              mode: d.mode,
+              rate: d.rate,
+              grade: d.grade,
+            }
+          : {
+              ...old,
+              tank: d.tank,
+              wear: d.wear,
+              sound: d.sound,
+              speed: d.speed,
+            },
+    );
     close();
     note("تم حفظ التعديلات");
   }
   async function begin() {
     snap.current = JSON.parse(JSON.stringify(s));
-    localStorage.setItem("dp.snapshot", JSON.stringify(s));
+    saveLocally("dp.snapshot", s);
     if (await tracking.start(s)) {
       close();
+      P("map");
+      window.scrollTo(0, 0);
       note("بدأ تتبّع الرحلة");
     }
   }
@@ -637,6 +672,12 @@ function App({ profile, changeProfile, showEntry }) {
           </div>
         </header>
         <main>
+          {temporary && (
+            <div className="pendingBanner" role="status">
+              التخزين غير متاح. تقدر تستخدم الحاسبة، لكن تغييراتك ورحلاتك لن
+              تُحفظ بعد إغلاق الصفحة.
+            </div>
+          )}
           {profile && !profile.synced && (
             <div className="pendingBanner" role="status">
               <Info size={16} />
@@ -675,7 +716,11 @@ function App({ profile, changeProfile, showEntry }) {
             <>
               <div className="topGrid">
                 <VehicleCard s={s} edit={() => goto("vehicle")} />
-                <FuelCard s={s} edit={() => goto("fuel")} />
+                <FuelCard
+                  s={s}
+                  feedState={feedState}
+                  edit={() => goto("fuel")}
+                />
               </div>
               <Stats list={list} range={range} setRange={G} />
               <div className="sectionBar toolsTitle">
@@ -692,11 +737,11 @@ function App({ profile, changeProfile, showEntry }) {
           ) : page === "calc" ? (
             <div className="topGrid">
               <CalculatorCard s={s} />
-              <FuelCard s={s} edit={() => goto("fuel")} />
+              <FuelCard s={s} feedState={feedState} edit={() => goto("fuel")} />
             </div>
           ) : page === "map" ? (
             <>
-              <TripMap expanded trip={trip} />
+              <TripMap expanded trip={trip} onStart={openTrip} />
               <div className="trackStats">
                 {[
                   [Gauge, "السرعة", nf(trip.speed), "كم/س"],
@@ -800,12 +845,16 @@ function App({ profile, changeProfile, showEntry }) {
                   <p>اختر مركبتك وعدّل الاستهلاك حسب تجربتك الفعلية.</p>
                   <VehiclePicker draft={draft} D={D} />
                   <Field
-                    label="معدل الاستهلاك التقديري"
+                    label={
+                      draft.mode === "measured"
+                        ? "معدل مقاس من التفويلتين"
+                        : "معدل الاستهلاك المستخدم"
+                    }
                     unit="لتر / 100 كم"
                     min={0.1}
                     max={100}
                     value={draft.rate}
-                    change={(v) => D({ ...draft, rate: v })}
+                    change={(v) => D({ ...draft, rate: v, mode: "manual" })}
                   />
                   <label className="field">
                     نوع البنزين
@@ -823,7 +872,8 @@ function App({ profile, changeProfile, showEntry }) {
                 <>
                   <p>
                     أسعار مرجعية بتاريخ <bdi>{draft.asOf || "2026-11-17"}</bdi>،
-                    وليست تغذية لحظية. عدّلها لتطابق سعر المحطة.
+                    يفحص التطبيق المصدر كل دقيقة أثناء فتحه. التعديل اليدوي له
+                    الأولوية حتى استعادة السعر المرجعي.
                   </p>
                   {[80, 92, 95].map((g) => (
                     <Field
@@ -833,7 +883,11 @@ function App({ profile, changeProfile, showEntry }) {
                       min={0.01}
                       value={draft.prices[g]}
                       change={(v) =>
-                        D({ ...draft, prices: { ...draft.prices, [g]: v } })
+                        D({
+                          ...draft,
+                          priceEdited: true,
+                          prices: { ...draft.prices, [g]: v },
+                        })
                       }
                     />
                   ))}
@@ -850,17 +904,21 @@ function App({ profile, changeProfile, showEntry }) {
                     onClick={async () => {
                       try {
                         const feed = await fetchPrices(s.asOf);
+                        setFeedState("ok");
                         S((old) => ({
                           ...old,
                           prices: feed.prices,
                           updated: null,
                           source: feed.source,
+                          checkedAt: feed.checkedAt,
                           asOf: feed.asOf,
                         }));
                         close();
                         note("تمت استعادة أحدث أسعار المرجع المتاحة");
                       } catch {
-                        note("تعذّر تحديث الأسعار. تم الاحتفاظ بالقيم الحالية.");
+                        note(
+                          "تعذّر تحديث الأسعار. تم الاحتفاظ بالقيم الحالية.",
+                        );
                       }
                     }}
                   >
@@ -969,10 +1027,23 @@ function App({ profile, changeProfile, showEntry }) {
               </div>
               <p>
                 يُستخدم موقعك لحساب المسافة والسرعة. عند عرض الخريطة الحية تُطلب
-                بلاطات المنطقة من OpenStreetMap. لا يتم حفظ مسار الرحلة في
-                السجل.
+                تفاصيل شوارع المنطقة من OpenFreeMap. إذا تعذّر الاتصال تظهر
+                خريطة إقليمية محلية ويستمر تتبّع المسافة. لا يتم حفظ مسار الرحلة
+                في السجل.
               </p>
               {tracking.error && <p className="warn">{tracking.error}</p>}
+              {native && tracking.gpsDisabled && (
+                <button
+                  className="subtle"
+                  onClick={() =>
+                    Driver.openLocationSettings().catch(() =>
+                      note("افتح إعدادات الموقع من إعدادات الهاتف"),
+                    )
+                  }
+                >
+                  فتح إعدادات الموقع في الهاتف
+                </button>
+              )}
               <button
                 className="lime full"
                 disabled={tracking.pending}
@@ -1007,9 +1078,7 @@ function App({ profile, changeProfile, showEntry }) {
 }
 function Root() {
   const [profile, setProfile] = useState(readProfile);
-  const [inside, open] = useState(
-    () => !!readProfile() || sessionStorage.getItem("dp.guest") === "1",
-  );
+  const [inside, open] = useState(() => !!readProfile() || guestFlag());
   // Retry a previously consented, pending enrollment once on a new visit.
   useEffect(() => {
     let alive = true;
@@ -1031,8 +1100,7 @@ function Root() {
   }, []);
   function enter(p) {
     setProfile(p);
-    if (!p) sessionStorage.setItem("dp.guest", "1");
-    else sessionStorage.removeItem("dp.guest");
+    guestFlag(!p);
     open(true);
   }
   return inside ? (
@@ -1040,10 +1108,10 @@ function Root() {
       profile={profile}
       changeProfile={(p) => {
         setProfile(p);
-        if (!p) sessionStorage.setItem("dp.guest", "1");
+        if (!p) guestFlag(true);
       }}
       showEntry={() => {
-        sessionStorage.removeItem("dp.guest");
+        guestFlag(false);
         open(false);
       }}
     />

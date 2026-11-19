@@ -680,7 +680,7 @@ select {
 }
 .statValue bdi {
   font:
-    650 clamp(24px, 2.2vw, 34px)/1 Arial,
+    650 clamp(24px, 2.2vw, 34px) / 1 Arial,
     sans-serif;
   letter-spacing: -1.1px;
 }
@@ -1654,4 +1654,44 @@ a {
   color: var(--lime);
   text-decoration: underline;
   font-size: 11px;
+}
+.vehicleTabs {
+  display: flex;
+  gap: 8px;
+}
+.vehicleTabs button {
+  flex: 1;
+  background: #212526;
+  border: 1px solid #414540;
+  border-radius: 6px;
+  padding: 7px;
+}
+.vehicleTabs button[aria-pressed="true"] {
+  background: #2b3621;
+  border-color: #829e51;
+  color: var(--lime);
+}
+.actualMap.leaflet-container {
+  background-color: #22292e;
+  background-image:
+    linear-gradient(#ffffff08 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff08 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.actualMap .leaflet-tile-pane {
+  filter: none;
+}
+.cityLabel.leaflet-tooltip {
+  background: #1b2327;
+  color: #dae2d5;
+  border: 0;
+  box-shadow: none;
+  font-size: 10px;
+}
+.leaflet-control-attribution {
+  font: 9px Arial;
+}
+.mapCity.offline {
+  max-width: calc(100% - 70px);
+  pointer-events: none;
 }

@@ -12,11 +12,47 @@ export default function VehiclePicker({ draft, D }) {
       .normalize("NFKD")
       .replace(/[\u064B-\u065F]/g, "")
       .trim();
-  const matches = vehicles.filter((x) =>
-    norm([x.name, x.model, x.search || ""].join(" ")).includes(norm(query)),
+  function choose(x) {
+    const saved = draft.vehicleRates?.[x.id];
+    D({
+      ...draft,
+      vehicle: x.id,
+      grade: saved?.grade ?? x.grade,
+      rate: saved?.rate ?? x.rate,
+      mode: saved?.mode ?? "mixed",
+    });
+    K("");
+    F("");
+  }
+  const matches = vehicles.filter(
+    (x) =>
+      x.type === v.type &&
+      norm([x.name, x.model, x.search || ""].join(" ")).includes(norm(query)),
   );
   return (
     <>
+      <div className="vehicleTabs" aria-label="نوع المركبة">
+        {[
+          ["سيارة", "سيارات"],
+          ["موتوسيكل", "موتوسيكلات"],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={v.type === key}
+            onClick={() => {
+              if (v.type !== key) {
+                choose(vehicles.find((x) => x.type === key));
+                setQuery("");
+                K("");
+                F("");
+              }
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <label className="field">
         ابحث بالعربية أو الإنجليزية
         <input
@@ -32,16 +68,7 @@ export default function VehiclePicker({ draft, D }) {
         المركبة والفئة
         <select
           value={v.id}
-          onChange={(e) => {
-            const x = resolveVehicle(e.target.value);
-            D({
-              ...draft,
-              vehicle: x.id,
-              grade: x.grade,
-              rate: x.rate,
-              mode: "mixed",
-            });
-          }}
+          onChange={(e) => choose(resolveVehicle(e.target.value))}
         >
           {!matches.includes(v) && (
             <option value={v.id}>
@@ -71,7 +98,11 @@ export default function VehiclePicker({ draft, D }) {
               <button
                 type="button"
                 key={key}
-                className={+draft.rate === rate ? "picked" : ""}
+                className={
+                  (draft.mode || "mixed") === key && +draft.rate === rate
+                    ? "picked"
+                    : ""
+                }
                 onClick={() => D({ ...draft, rate, mode: key })}
               >
                 {title}
@@ -84,6 +115,17 @@ export default function VehiclePicker({ draft, D }) {
             {v.tank} لتر؛ لا يعني أنه ممتلئ. طابق الأوكتان مع كتيّب سيارتك.
           </small>
         </>
+      )}
+      <small>
+        {draft.mode === "measured"
+          ? "المعدل الحالي محسوب من بيانات تفويلك."
+          : "المعدل الحالي تقدير للتخطيط، وليس قياساً فعلياً لمركبتك."}{" "}
+        لترات الرحلة تُقدّر من المسافة، وليست قراءة من حساس الخزان.
+      </small>
+      {v.spec && (
+        <a href={v.spec.url} target="_blank" rel="noreferrer">
+          مرجع مواصفات الفئة (وليس قياس استهلاكها) ↗
+        </a>
       )}
       <details className="calibrate">
         <summary>معايرة الاستهلاك من تفويلتين</summary>

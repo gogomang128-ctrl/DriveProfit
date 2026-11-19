@@ -127,7 +127,13 @@ export default function Entry({ enter }) {
     E("");
     try {
       let p = createProfile(name, phone);
-      persistProfile(p);
+      try {
+        persistProfile(p);
+      } catch {
+        throw Error(
+          "تعذّر حفظ ملفك على الجهاز. افتح الموقع في تبويب مستقل أو اختر «استكشف كضيف».",
+        );
+      }
       try {
         await profileRPC(p);
         p = { ...p, synced: true };

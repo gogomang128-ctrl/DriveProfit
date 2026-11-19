@@ -9,7 +9,7 @@ import {
   Radio,
   ArrowUpLeft,
 } from "lucide-react";
-export default function TripMap({ trip, onOpen, expanded = false }) {
+export default function TripMap({ trip, onOpen, onStart, expanded = false }) {
   const [zoom, Z] = useState(1);
   const live = !!trip.point,
     interactive = live || expanded;
@@ -80,6 +80,12 @@ export default function TripMap({ trip, onOpen, expanded = false }) {
           <Radio size={15} />
           {trip.active ? "جارٍ تتبّع الرحلة" : "التتبّع غير نشط"}
         </span>
+        {expanded && !trip.active && (
+          <button onClick={onStart}>
+            <LocateFixed size={16} />
+            تفعيل GPS وبدء التتبّع
+          </button>
+        )}
         {!expanded && (
           <button onClick={onOpen}>
             عرض الخريطة <ArrowUpLeft size={15} />
