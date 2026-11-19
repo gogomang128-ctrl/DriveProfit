@@ -1,4 +1,4 @@
-name: Verify web and Android debug build
+name: Verify web and Android preview
 on: [push, pull_request, workflow_dispatch]
 permissions: { contents: read }
 jobs:
@@ -13,9 +13,34 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run android
-      - run: ./gradlew testDebugUnitTest assembleDebug
+      - run: ./gradlew testPreviewUnitTest assemblePreview
         working-directory: android
+      - name: Verify packaged app and signature
+        run: |
+          set -euo pipefail
+          cp android/app/build/outputs/apk/preview/app-preview.apk DriveProfit-preview.apk
+          tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$tools/apksigner" verify --verbose DriveProfit-preview.apk
+          "$tools/aapt" dump badging DriveProfit-preview.apk > /tmp/driveprofit-badging
+          grep -F "package: name='eg.driveprofit.app.preview'" /tmp/driveprofit-badging
+          sha256sum DriveProfit-preview.apk > SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: DriveProfit-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: DriveProfit-preview
+          path: |
+            DriveProfit-preview.apk
+            SHA256SUMS.txt
+  publish-preview:
+    needs: verify
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[apk-preview]')
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: DriveProfit-preview }
+      - name: Publish verified test build (not a production signing identity)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum -c SHA256SUMS.txt
+          gh release create "preview-${GITHUB_SHA::8}" DriveProfit-preview.apk SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title 'DriveProfit 0.2.0 — Android Preview' --notes 'Non-debuggable preview, signed with a test certificate. Android 6+ and a current Android System WebView required. Not a Play Store release. Future preview builds may require uninstalling; this removes local trips.'

@@ -1,5 +1,7 @@
+import records from "../vehicles_egypt.json" with { type: "json" };
 export const vehicles = [
   {
+    id: "vigorey_vlr_200",
     name: "فيجوري",
     model: "VLR 200",
     type: "موتوسيكل",
@@ -8,6 +10,7 @@ export const vehicles = [
     grade: 92,
   },
   {
+    id: "bajaj_boxer_150",
     name: "باجاج",
     model: "Boxer 150",
     type: "موتوسيكل",
@@ -15,23 +18,38 @@ export const vehicles = [
     rate: 2.4,
     grade: 92,
   },
-  {
-    name: "نيسان",
-    model: "Sunny",
-    type: "سيارة",
-    cc: 1500,
-    rate: 7,
-    grade: 92,
-  },
-  {
-    name: "تويوتا",
-    model: "Corolla",
-    type: "سيارة",
-    cc: 1600,
-    rate: 6.5,
-    grade: 95,
-  },
 ];
+// Preserve the two legacy indices from earlier installations, then use stable IDs for all future selections.
+const catalog = records.map((r) => ({
+  id: r.id,
+  name: r.brand.split(" / ")[0],
+  model: r.model.split(" / ")[1],
+  search: [r.brand, r.model, r.reference_model_year].join(" "),
+  type: "سيارة",
+  cc: r.engine_cc,
+  rate: r.liters_per_100km_avg,
+  city: r.liters_per_100km_city,
+  highway: r.liters_per_100km_highway,
+  grade: r.fuel_type,
+  tank: r.tank_capacity_liters,
+  year: r.reference_model_year,
+  gear: r.transmission,
+}));
+vehicles.push(
+  ...["nissan_sunny_n17", "toyota_corolla_e210"].map((id) =>
+    catalog.find((v) => v.id === id),
+  ),
+  ...catalog.filter(
+    (v) => !["nissan_sunny_n17", "toyota_corolla_e210"].includes(v.id),
+  ),
+);
+export function resolveVehicle(key) {
+  return (
+    (typeof key === "number"
+      ? vehicles[key]
+      : vehicles.find((v) => v.id === key)) || vehicles[0]
+  );
+}
 export const initial = {
   vehicle: 0,
   grade: 92,

@@ -36,7 +36,10 @@ import {
   UserRound,
   PanelRight,
 } from "lucide-react";
-import { vehicles, initial, calc } from "./engine";
+import Entry, { CaptainAccount, DownloadApp } from "./Entry";
+import { readProfile } from "./profile";
+import VehiclePicker from "./VehiclePicker";
+import { resolveVehicle, initial, calc } from "./engine";
 import { native, Driver, useTracking } from "./tracking";
 import TripMap from "./Map";
 import "./style.css";
@@ -257,7 +260,7 @@ function FuelCard({ s, edit }) {
   );
 }
 function VehicleCard({ s, edit }) {
-  let v = vehicles[s.vehicle];
+  let v = resolveVehicle(s.vehicle);
   return (
     <section className="hero">
       <div className="heroGrid" />
@@ -292,12 +295,12 @@ function VehicleCard({ s, edit }) {
       <div className="heroFoot">
         <span>
           <Fuel />
-          الاستهلاك <b>{nf(s.rate)}</b> لتر / 100 كم
+          الاستهلاك <b>{nf(s.rate, 2)}</b> لتر / 100 كم
         </span>
         <i />
         <span>
           <Route />
-          كفاءة الوقود <b>{nf(100 / s.rate)}</b> كم / لتر
+          كفاءة الوقود <b>{nf(100 / s.rate, 2)}</b> كم / لتر
         </span>
       </div>
     </section>
@@ -390,7 +393,7 @@ function Stats({ list, range, setRange }) {
     </>
   );
 }
-function App() {
+function App({ profile, changeProfile, showEntry }) {
   const [page, P] = useState("dash"),
     [modal, M] = useState(""),
     [mobile, U] = useState(false),
@@ -439,7 +442,7 @@ function App() {
   function goto(key) {
     U(false);
     if (["vehicle", "fuel", "settings", "alerts"].includes(key)) {
-      D(structuredClone(s));
+      D(JSON.parse(JSON.stringify(s)));
       NN("");
       M(key);
     } else {
@@ -505,7 +508,7 @@ function App() {
     note("تم حفظ التعديلات");
   }
   async function begin() {
-    snap.current = structuredClone(s);
+    snap.current = JSON.parse(JSON.stringify(s));
     localStorage.setItem("dp.snapshot", JSON.stringify(s));
     if (await tracking.start(s)) {
       close();
@@ -570,6 +573,7 @@ function App() {
           {sidebarGroup(4, 8)}
         </nav>
         <div className="sideBottom">
+          <DownloadApp />
           <div className="system">
             <i className="dot" />
             النظام جاهز <Activity size={15} />
@@ -579,12 +583,22 @@ function App() {
               <UserRound />
             </span>
             <div>
-              <b>حساب الكابتن</b>
-              <small>حساب محلي</small>
+              <b>{profile?.name || "حساب الكابتن"}</b>
+              <small>
+                {profile
+                  ? profile.synced
+                    ? "ملف الكابتن"
+                    : "بانتظار المزامنة"
+                  : "متابعة كضيف"}
+              </small>
             </div>
             <button
-              aria-label="إعدادات الحساب المحلي"
-              onClick={() => goto("settings")}
+              aria-label="فتح ملف الكابتن"
+              onClick={() => {
+                if (profile) M("profile");
+                else if (trip.active) note("أنه الرحلة قبل التسجيل");
+                else showEntry();
+              }}
             >
               <Settings2 size={17} />
             </button>
@@ -758,41 +772,26 @@ function App() {
         <Modal
           title={
             navs.find((n) => n[0] === modal)?.[1] ||
-            { start: "بدء رحلة جديدة", end: "إنهاء وحفظ الرحلة" }[modal]
+            {
+              profile: "ملف الكابتن",
+              start: "بدء رحلة جديدة",
+              end: "إنهاء وحفظ الرحلة",
+            }[modal]
           }
           close={close}
         >
-          {["vehicle", "fuel", "settings"].includes(modal) ? (
+          {modal === "profile" && profile ? (
+            <CaptainAccount
+              profile={profile}
+              change={changeProfile}
+              close={close}
+            />
+          ) : ["vehicle", "fuel", "settings"].includes(modal) ? (
             <form className="formBody" onSubmit={save}>
               {modal === "vehicle" ? (
                 <>
                   <p>اختر مركبتك وعدّل الاستهلاك حسب تجربتك الفعلية.</p>
-                  <div className="vehicleList">
-                    {vehicles.map((v, i) => (
-                      <button
-                        type="button"
-                        key={i}
-                        className={draft.vehicle === i ? "chosen" : ""}
-                        onClick={() =>
-                          D({
-                            ...draft,
-                            vehicle: i,
-                            rate: v.rate,
-                            grade: v.grade,
-                          })
-                        }
-                      >
-                        {v.type === "سيارة" ? <CarFront /> : <Motorbike />}
-                        <span>
-                          {v.name} <bdi>{v.model}</bdi>
-                          <small>
-                            {v.cc} سي سي · {v.type}
-                          </small>
-                        </span>
-                        {draft.vehicle === i && <Check size={17} />}
-                      </button>
-                    ))}
-                  </div>
+                  <VehiclePicker draft={draft} D={D} />
                   <Field
                     label="معدل الاستهلاك التقديري"
                     unit="لتر / 100 كم"
@@ -999,4 +998,31 @@ function App() {
     </div>
   );
 }
-createRoot(document.getElementById("root")).render(<App />);
+function Root() {
+  const [profile, setProfile] = useState(readProfile);
+  const [inside, open] = useState(
+    () => !!readProfile() || sessionStorage.getItem("dp.guest") === "1",
+  );
+  function enter(p) {
+    setProfile(p);
+    if (!p) sessionStorage.setItem("dp.guest", "1");
+    else sessionStorage.removeItem("dp.guest");
+    open(true);
+  }
+  return inside ? (
+    <App
+      profile={profile}
+      changeProfile={(p) => {
+        setProfile(p);
+        if (!p) sessionStorage.setItem("dp.guest", "1");
+      }}
+      showEntry={() => {
+        sessionStorage.removeItem("dp.guest");
+        open(false);
+      }}
+    />
+  ) : (
+    <Entry enter={enter} />
+  );
+}
+createRoot(document.getElementById("root")).render(<Root />);

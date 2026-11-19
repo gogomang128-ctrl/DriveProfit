@@ -1333,3 +1333,306 @@ a {
     transition-duration: 0s !important;
   }
 }
+/* Captain access / enrollment */
+.accessPage {
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse at 79% 15%, #24301b44, transparent 53%), #0e1011;
+}
+.accessNav {
+  height: 76px;
+  padding: 0 max(5vw, 18px);
+  background: #111415;
+}
+.entryBrand,
+.heroChips,
+.heroChips span,
+.entryFoot,
+.entryFoot span,
+.apkLink,
+.apkWaiting {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.entryBrand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+.entryBrand strong {
+  font: 800 25px Arial;
+  letter-spacing: -1.2px;
+}
+.entryBrand strong span,
+.heroPitch em {
+  color: var(--lime);
+}
+.entryMain {
+  max-width: 1040px;
+  padding: clamp(18px, 4vw, 64px) 20px;
+}
+.entryGrid {
+  display: grid;
+  grid-template-columns: 1.14fr 1fr;
+  gap: 20px;
+}
+.entryHero,
+.joinForm {
+  border: 1px solid #343b31;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.entryHero {
+  background: linear-gradient(145deg, #15222d, #171d18);
+}
+.introFilm {
+  position: relative;
+  overflow: hidden;
+  background: #14222f;
+  padding: 0;
+}
+.introFilm img {
+  display: block;
+  object-fit: cover;
+  width: 100%;
+  height: 220px;
+}
+.filmId {
+  position: absolute;
+  left: 16px;
+  bottom: 12px;
+  font: 9px monospace;
+  letter-spacing: 2px;
+  color: #a9b8bd;
+}
+.heroPitch {
+  padding: 24px 28px;
+}
+.heroPitch h1 {
+  font-size: clamp(31px, 4vw, 48px);
+  line-height: 1.65;
+}
+.heroPitch em {
+  font-style: normal;
+}
+.heroPitch p,
+.joinForm p {
+  font-size: 13px;
+  color: #b1b8ba;
+}
+.heroChips {
+  gap: 9px;
+  margin: 17px 0;
+}
+.heroChips span {
+  border: 1px solid #394335;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #c9d8c2;
+}
+.heroChips svg {
+  color: var(--lime);
+}
+.apkLink,
+.apkWaiting {
+  width: fit-content;
+  color: #c4e79c;
+  border: 1px solid #45513c;
+  background: #222b20;
+  border-radius: 8px;
+  padding: 6px 12px;
+  text-decoration: none;
+  font-weight: 650;
+  font-size: 12px;
+}
+.apkLink small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #a8b39f;
+}
+.sideBottom .apkLink,
+.sideBottom .apkWaiting {
+  margin-bottom: 10px;
+  width: 100%;
+  justify-content: center;
+}
+.joinForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #171a1b;
+  padding: clamp(20px, 2.8vw, 38px);
+  justify-content: center;
+}
+.joinIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #2a3521;
+  color: var(--lime);
+}
+.joinForm h2 {
+  line-height: 1.3;
+  font-size: 26px;
+}
+.joinForm > p {
+  margin-top: -6px;
+}
+.field input.textBox {
+  direction: inherit;
+  font: inherit;
+  text-align: start;
+  background: #101315;
+  border: 1px solid #383d3e;
+  border-radius: 7px;
+  padding: 8px 10px;
+  height: 42px;
+}
+.field input[type="tel"].textBox {
+  direction: ltr;
+  text-align: left;
+}
+.joinConsent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.9;
+  color: #aeb4b5;
+}
+.joinConsent input {
+  margin-top: 5px;
+}
+.guest {
+  color: #c7d0be;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 12px;
+}
+.entryFoot {
+  justify-content: space-between;
+  color: #939b93;
+  font-size: 11px;
+  margin-top: 14px;
+}
+.consumptionModes {
+  display: flex;
+  gap: 6px;
+}
+.consumptionModes button {
+  flex: 1;
+  flex-direction: column;
+  gap: 0;
+  font-size: 11px;
+  border: 1px solid #3a4039;
+  border-radius: 7px;
+  padding: 6px;
+  background: #202421;
+}
+.consumptionModes button b {
+  font: 700 18px Arial;
+}
+.consumptionModes .picked {
+  border-color: #88a84d;
+  color: var(--lime);
+}
+.profile b {
+  overflow-wrap: anywhere;
+}
+.calibrate {
+  padding: 9px;
+  border: 1px solid #353b32;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.calibrate summary {
+  cursor: pointer;
+}
+.calibrate label {
+  margin: 8px 0;
+}
+.apkWaiting {
+  font-size: 11px;
+  color: #9ba291;
+}
+@media (max-width: 700px) {
+  .accessNav {
+    height: 56px;
+  }
+  .entryMain {
+    padding: 8px 14px 20px;
+  }
+  .entryGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .entryHero {
+    display: grid;
+    grid-template-columns: 1fr 32%;
+    align-items: center;
+  }
+  .introFilm {
+    grid-column: 2;
+    grid-row: 1;
+    height: 100%;
+    background: #14222f;
+    display: grid;
+    align-items: center;
+  }
+  .introFilm img {
+    height: auto;
+    object-fit: contain;
+    transform: scale(1.4);
+  }
+  .filmId {
+    font-size: 8px;
+    left: 5px;
+  }
+  .heroPitch {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 14px;
+  }
+  .heroPitch h1 {
+    font-size: 28px;
+  }
+  .heroPitch p {
+    font-size: 11px;
+  }
+  .heroChips {
+    display: none;
+  }
+  .heroPitch .apkLink,
+  .heroPitch .apkWaiting {
+    margin-top: 10px;
+  }
+  .heroPitch .overline {
+    font-size: 8px;
+  }
+  .joinForm {
+    padding: 20px;
+    gap: 12px;
+  }
+  .joinIcon {
+    display: none;
+  }
+  .joinForm h2 {
+    font-size: 23px;
+  }
+  .entryFoot .mini-label {
+    display: none;
+  }
+}
+@media (max-height: 720px) {
+  aside nav {
+    min-height: 60px;
+  }
+  .sideBottom {
+    flex-shrink: 0;
+  }
+}
