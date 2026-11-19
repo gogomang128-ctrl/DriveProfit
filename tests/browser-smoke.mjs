@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright-core";
 import { preview } from "vite";
+import { streetFixture } from "./street-fixture.mjs";
 const server = await preview({
   preview: { host: "127.0.0.1", port: 0, open: false },
 });
@@ -34,16 +35,20 @@ try {
   await p.route("https://tiles.openfreemap.org/**", (r) =>
     r.fulfill({ status: 403, body: "Forbidden" }),
   );
+  let feedGood = true,
+    published92 = 22.25;
   await p.route("**/functions/v1/egypt-fuel-prices", (r) =>
-    r.fulfill({
-      json: {
-        asOf: new Date().toISOString().slice(0, 10),
-        checkedAt: new Date().toISOString(),
-        source: "https://www.petroleum.gov.eg/ar-eg/Pages/HomePage.aspx",
-        currency: "EGP",
-        prices: { 80: 20.75, 92: 22.25, 95: 24 },
-      },
-    }),
+    !feedGood
+      ? r.fulfill({ status: 503, body: "unavailable" })
+      : r.fulfill({
+          json: {
+            asOf: new Date().toISOString().slice(0, 10),
+            checkedAt: new Date().toISOString(),
+            source: "https://www.petroleum.gov.eg/ar-eg/Pages/HomePage.aspx",
+            currency: "EGP",
+            prices: { 80: 20.75, 92: published92, 95: 24 },
+          },
+        }),
   );
   const restricted = await b.newPage();
   restricted.on("pageerror", (e) => errors.push(String(e)));
@@ -84,6 +89,31 @@ try {
     .getByRole("dialog")
     .getByText(/لم يُسمح بالموقع/)
     .waitFor();
+  const onlineMap = await b.newPage({ deviceScaleFactor: 1 });
+  onlineMap.on("pageerror", (e) => errors.push(String(e)));
+  const host = "https://tiles.openfreemap.org/planet";
+  await onlineMap.route(host, (r) =>
+    r.fulfill({ json: { tiles: [host + "/test/{z}/{x}/{y}.pbf"] } }),
+  );
+  await onlineMap.route(host + "/test/**", (r) =>
+    r.fulfill({ body: streetFixture(), contentType: "application/x-protobuf" }),
+  );
+  await onlineMap.goto(base);
+  await onlineMap.getByRole("button", { name: "استكشف كضيف" }).click();
+  await onlineMap.getByRole("button", { name: "عرض الخريطة" }).click();
+  const tile = onlineMap.locator("canvas.leaflet-tile-loaded").first();
+  await tile.waitFor();
+  assert.ok(
+    await tile.evaluate((c) => {
+      const ctx = c.getContext("2d");
+      return (
+        ctx.getImageData(128, 128, 1, 1).data[0] >
+        ctx.getImageData(128, 10, 1, 1).data[0]
+      );
+    }),
+    "decoded road must be visible",
+  );
+  await onlineMap.close();
   await restricted.close();
   await p.goto(base);
   await p.evaluate(() => document.fonts.ready);
@@ -96,6 +126,35 @@ try {
   await p.reload();
   await p.getByRole("heading", { name: "لوحة القيادة" }).waitFor();
   await p.getByText(/آخر تحقق:/).waitFor();
+  const current92 = () =>
+    p.evaluate(
+      () => JSON.parse(localStorage.getItem("dp.settings")).prices[92],
+    );
+  published92 = 23;
+  await p.evaluate(() => window.dispatchEvent(new Event("online")));
+  await p.waitForFunction(
+    () => JSON.parse(localStorage.getItem("dp.settings")).prices[92] === 23,
+  );
+  feedGood = false;
+  await p.evaluate(() => window.dispatchEvent(new Event("online")));
+  await p.getByText(/تعذّر التحديث/).waitFor();
+  assert.equal(await current92(), 23);
+  feedGood = true;
+  published92 = 22.25;
+  await p.getByRole("button", { name: "تعديل", exact: true }).click();
+  await p.getByLabel("بنزين 92").fill("25");
+  await p.getByRole("button", { name: "حفظ التغييرات" }).click();
+  await p.getByText("سعر يدوي").waitFor();
+  const refreshed = p.waitForResponse((r) =>
+    r.url().includes("/egypt-fuel-prices"),
+  );
+  await p.evaluate(() => window.dispatchEvent(new Event("online")));
+  await refreshed;
+  assert.equal(await current92(), 25);
+  await p.getByRole("button", { name: "تعديل", exact: true }).click();
+  await p.getByRole("button", { name: "استعادة الأسعار المرجعية" }).click();
+  await p.getByText(/آخر تحقق:/).waitFor();
+  assert.equal(await current92(), 22.25);
   await p.getByRole("button", { name: "تغيير المركبة" }).click();
   assert.equal(
     await p.locator('select option[value="fiat_tipo_14_mt"]').count(),
