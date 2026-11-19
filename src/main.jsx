@@ -564,7 +564,10 @@ function App({ profile, changeProfile, showEntry }) {
       note("تعذّر إنهاء الرحلة. أعد المحاولة.");
     }
   }
-  const openTrip = () => M(trip.active ? "end" : "start");
+  const openTrip = () => {
+    tracking.clearError();
+    M(trip.active ? "end" : "start");
+  };
   const title = navs.find((n) => n[0] === page)?.[1] || "";
   const date = new Intl.DateTimeFormat("ar-EG", {
     weekday: "long",
@@ -813,7 +816,7 @@ function App({ profile, changeProfile, showEntry }) {
               )}
             </section>
           )}
-          {tracking.error && (
+          {tracking.error && trip.active && !modal && (
             <p className="warn" role="alert">
               {tracking.error}
             </p>
@@ -1027,12 +1030,12 @@ function App({ profile, changeProfile, showEntry }) {
               </div>
               <p>
                 يُستخدم موقعك لحساب المسافة والسرعة. عند عرض الخريطة الحية تُطلب
-                تفاصيل شوارع المنطقة من OpenFreeMap. إذا تعذّر الاتصال تظهر
-                خريطة إقليمية محلية ويستمر تتبّع المسافة. لا يتم حفظ مسار الرحلة
-                في السجل.
+                تفاصيل شوارع المنطقة من Google Maps عند تفعيلها أو من
+                OpenFreeMap كبديل. إذا تعذّر الاتصال تظهر خريطة إقليمية محلية
+                ويستمر تتبّع المسافة. لا يتم حفظ مسار الرحلة في السجل.
               </p>
               {tracking.error && <p className="warn">{tracking.error}</p>}
-              {native && tracking.gpsDisabled && (
+              {native && tracking.recovery === "gps" && (
                 <button
                   className="subtle"
                   onClick={() =>
@@ -1044,15 +1047,53 @@ function App({ profile, changeProfile, showEntry }) {
                   فتح إعدادات الموقع في الهاتف
                 </button>
               )}
+              {native && tracking.recovery === "app" && (
+                <button
+                  className="subtle"
+                  onClick={() =>
+                    Driver.openAppSettings().catch(() =>
+                      note("افتح إعدادات الهاتف ← التطبيقات ← DriveProfit"),
+                    )
+                  }
+                >
+                  فتح أذونات DriveProfit
+                </button>
+              )}
+              {tracking.recovery === "frame" && (
+                <a
+                  className="subtle"
+                  href={window.location.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  فتح في تبويب مستقل
+                </a>
+              )}
+              {tracking.recovery && (
+                <button
+                  className="subtle"
+                  onClick={() => {
+                    close();
+                    goto("map");
+                  }}
+                >
+                  استعراض الخريطة بدون تتبّع
+                </button>
+              )}
               <button
                 className="lime full"
-                disabled={tracking.pending}
+                disabled={
+                  tracking.pending ||
+                  ["frame", "policy", "unsupported"].includes(tracking.recovery)
+                }
                 onClick={begin}
               >
                 <Navigation size={16} />
                 {tracking.pending
                   ? "جارٍ تحديد الموقع…"
-                  : "السماح بالموقع وبدء التتبّع"}
+                  : tracking.recovery
+                    ? "أعد التحقق بعد تعديل الإعدادات"
+                    : "السماح بالموقع وبدء التتبّع"}
               </button>
             </div>
           ) : (

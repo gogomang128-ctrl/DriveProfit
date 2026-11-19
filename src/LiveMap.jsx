@@ -20,7 +20,7 @@ export default function LiveMap({ point, route }) {
       preferCanvas: true,
       minZoom: 5,
       maxZoom: 19,
-    }).setView(first.current || [30.0444, 31.2357], first.current ? 15 : 9);
+    }).setView(first.current || [30.0444, 31.2357], first.current ? 16 : 13);
     m.current = map;
     const regional = regionalLayer(map).addTo(map);
     map.attributionControl.addAttribution("Natural Earth");
@@ -33,6 +33,7 @@ export default function LiveMap({ point, route }) {
       streets?.off();
       if (streets && map.hasLayer(streets)) map.removeLayer(streets);
       regional.addTo(map);
+      if (map.getZoom() > 11) map.setZoom(10);
       setBase("offline");
     };
     const timer = setTimeout(fallback, 8000);
@@ -48,11 +49,11 @@ export default function LiveMap({ point, route }) {
         layer.once("tileerror", fallback).addTo(map);
       })
       .catch(fallback);
-    line.current = L.polyline([], { color: "#99bf45", weight: 4 }).addTo(map);
+    line.current = L.polyline([], { color: "#1565d8", weight: 6 }).addTo(map);
     mark.current = L.circleMarker([0, 0], {
-      radius: 7,
-      color: "#1d241a",
-      fillColor: "#b6ec50",
+      radius: 9,
+      color: "#fff",
+      fillColor: "#155cd0",
       fillOpacity: 1,
     });
     map.on("dragstart", () => {
@@ -78,7 +79,10 @@ export default function LiveMap({ point, route }) {
     mark.current.setLatLng(point).addTo(m.current);
     line.current.setLatLngs(route);
     if (follow.current) {
-      if (!first.current) m.current.setView(point, 15, { animate: false });
+      if (!first.current)
+        m.current.setView(point, base === "offline" ? 10 : 16, {
+          animate: false,
+        });
       else m.current.panTo(point, { animate: false });
     }
     first.current = point;
@@ -99,7 +103,10 @@ export default function LiveMap({ point, route }) {
           onClick={() => {
             follow.current = true;
             followState(true);
-            m.current?.setView(point || [30.0444, 31.2357], point ? 15 : 9);
+            m.current?.setView(
+              point || [30.0444, 31.2357],
+              base === "offline" ? 10 : point ? 16 : 13,
+            );
           }}
         >
           <LocateFixed />

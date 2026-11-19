@@ -89,6 +89,13 @@ try {
     .getByRole("dialog")
     .getByText(/لم يُسمح بالموقع/)
     .waitFor();
+  await restricted
+    .getByRole("button", { name: "استعراض الخريطة بدون تتبّع" })
+    .click();
+  await restricted
+    .getByRole("link", { name: /فتح القاهرة في خرائط Google/ })
+    .waitFor();
+  assert.equal(await restricted.getByText(/لم يُسمح بالموقع/).count(), 0);
   const onlineMap = await b.newPage({ deviceScaleFactor: 1 });
   onlineMap.on("pageerror", (e) => errors.push(String(e)));
   const host = "https://tiles.openfreemap.org/planet";
@@ -107,7 +114,7 @@ try {
     await tile.evaluate((c) => {
       const ctx = c.getContext("2d");
       return (
-        ctx.getImageData(128, 128, 1, 1).data[0] >
+        ctx.getImageData(128, 128, 1, 1).data[0] <
         ctx.getImageData(128, 10, 1, 1).data[0]
       );
     }),

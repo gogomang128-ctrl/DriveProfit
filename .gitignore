@@ -5,3 +5,6 @@ android/local.properties
 android/**/build/
 android/app/src/main/assets/public/
 *.apk
+.env
+.env.*
+!.env.example

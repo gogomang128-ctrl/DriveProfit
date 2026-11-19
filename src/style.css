@@ -1695,3 +1695,28 @@ a {
   max-width: calc(100% - 70px);
   pointer-events: none;
 }
+.mapProvider {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #20272b;
+  padding: 8px 15px;
+  font-size: 12px;
+  color: #ced6d8;
+}
+.mapProvider a {
+  color: #d0ee90;
+  text-decoration: underline;
+}
+.mapTools button {
+  width: 36px;
+  height: 36px;
+}
+.mapTools svg {
+  width: 18px;
+}
+.mapCanvas.expanded {
+  height: clamp(320px, 56vh, 720px);
+}

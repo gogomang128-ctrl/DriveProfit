@@ -52,6 +52,17 @@ public class DriverPlugin extends Plugin {
   }
 
   @PluginMethod
+  public void openAppSettings(PluginCall call) {
+    try {
+      getActivity().startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        android.net.Uri.fromParts("package", getContext().getPackageName(), null)));
+      call.resolve();
+    } catch (RuntimeException e) {
+      call.reject("Cannot open app settings");
+    }
+  }
+
+  @PluginMethod
   public void openLocationSettings(PluginCall call) {
     try {
       getActivity().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
@@ -61,9 +72,15 @@ public class DriverPlugin extends Plugin {
     }
   }
 
+  // Read the OS grant on each user-initiated attempt, including after a Settings change.
+  private boolean preciseLocationGranted() {
+    return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+      == android.content.pm.PackageManager.PERMISSION_GRANTED;
+  }
+
   @PluginMethod
   public void start(PluginCall call) {
-    if (getPermissionState("gps") != PermissionState.GRANTED) {
+    if (!preciseLocationGranted()) {
       requestPermissionForAlias("gps", call, "gpsReady");
       return;
     }
@@ -72,8 +89,10 @@ public class DriverPlugin extends Plugin {
 
   @PermissionCallback
   private void gpsReady(PluginCall call) {
-    if (getPermissionState("gps") != PermissionState.GRANTED) {
-      call.reject("Precise location required");
+    if (!preciseLocationGranted()) {
+      boolean coarse = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+        == android.content.pm.PackageManager.PERMISSION_GRANTED;
+      call.reject(coarse ? "Approximate only" : "Precise location required");
       return;
     }
     if (

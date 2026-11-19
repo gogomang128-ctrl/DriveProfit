@@ -46,7 +46,7 @@ export async function streetLayer(signal) {
         );
         const ctx = canvas.getContext("2d");
         ctx.scale(ratio, ratio);
-        ctx.fillStyle = "#242b2e";
+        ctx.fillStyle = "#edeae1";
         ctx.fillRect(0, 0, 256, 256);
         function draw(name, color, width) {
           const group = vt.layers[name];
@@ -71,7 +71,7 @@ export async function streetLayer(signal) {
                 name === "transportation" &&
                 ["motorway", "trunk", "primary"].includes(f.properties.class)
               ) {
-                ctx.strokeStyle = "#a79871";
+                ctx.strokeStyle = "#ca8c35";
                 ctx.lineWidth = 2.5;
               }
               ctx.stroke();
@@ -81,13 +81,47 @@ export async function streetLayer(signal) {
             }
           }
         }
-        draw("park", "#293c30");
-        draw("water", "#284655");
-        draw("building", "#333b3d");
-        draw("waterway", "#345567", 1.4);
-        draw("transportation", "#697174", 1.25);
+        draw("park", "#c3ddbb");
+        draw("water", "#9acfe8");
+        draw("building", "#ded8d0");
+        draw("waterway", "#70b3d8", 1.4);
+        draw("transportation", "#81858a", 1.25);
+        // Label a limited number of named streets, avoiding nearby duplicates.
+        const labels = vt.layers.transportation_name,
+          used = [];
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#fff";
+        ctx.fillStyle = "#344049";
+        if (coords.z >= 12 && labels)
+          for (let i = 0; i < labels.length && used.length < 6; i++) {
+            const f = labels.feature(i),
+              name = f.properties["name:ar"] || f.properties.name;
+            if (!name || f.type !== 2) continue;
+            const line = f.loadGeometry()[0];
+            if (!line?.length) continue;
+            const p = line[Math.floor(line.length / 2)],
+              x = (p.x * 256) / labels.extent,
+              y = (p.y * 256) / labels.extent,
+              w = ctx.measureText(name).width / 2;
+            if (
+              x < w ||
+              x > 256 - w ||
+              y < 12 ||
+              y > 244 ||
+              used.some(
+                (a) =>
+                  Math.abs(a.x - x) < a.w + w + 6 && Math.abs(a.y - y) < 18,
+              )
+            )
+              continue;
+            used.push({ x, y, w });
+            ctx.strokeText(name, x, y);
+            ctx.fillText(name, x, y);
+          }
         const names = vt.layers.place;
-        ctx.fillStyle = "#e1e6db";
+        ctx.fillStyle = "#27363d";
         ctx.textAlign = "center";
         ctx.font = "11px sans-serif";
         if (names)

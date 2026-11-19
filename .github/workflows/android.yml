@@ -13,6 +13,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run android
+        env:
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
       - run: ./gradlew testPreviewUnitTest assemblePreview
         working-directory: android
       - name: Verify packaged app and signature
@@ -43,4 +45,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sha256sum -c SHA256SUMS.txt
-          gh release create "preview-${GITHUB_SHA::8}" DriveProfit-preview.apk SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title 'DriveProfit 0.3.0 — Android Preview' --notes 'Non-debuggable preview, signed with a test certificate. Android 6+ and a current Android System WebView required. Not a Play Store release. Future preview builds may require uninstalling; this removes local trips.'
+          gh release create "preview-${GITHUB_SHA::8}" DriveProfit-preview.apk SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title 'DriveProfit 0.3.1 — Android Preview' --notes 'Non-debuggable preview, signed with a test certificate. Android 6+ and a current Android System WebView required. Not a Play Store release. Future preview builds may require uninstalling; this removes local trips.'
