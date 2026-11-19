@@ -1,0 +1,22 @@
+name: Verify web and Android debug build
+on: [push, pull_request, workflow_dispatch]
+permissions: { contents: read }
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm test
+      - run: npm run android
+      - run: ./gradlew testDebugUnitTest assembleDebug
+        working-directory: android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DriveProfit-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk

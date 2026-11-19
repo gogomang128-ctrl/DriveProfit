@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DriveProfit</string>
+    <string name="title_activity_main">DriveProfit</string>
+    <string name="package_name">eg.driveprofit.app</string>
+    <string name="custom_url_scheme">eg.driveprofit.app</string>
+    <string name="assistant_label">DriveProfit · مساعد إندرايف</string>
+    <string name="offer_description">يقرأ سعر ومسافة العرض الظاهر في إندرايف فقط، ويعرض تقدير الربح في فقاعة مؤقتة. لا يرسل محتوى الشاشة ولا يقبل الرحلة نيابة عنك.</string>
+</resources>

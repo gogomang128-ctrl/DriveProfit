@@ -1,0 +1,36 @@
+{
+  "name": "driveprofit",
+  "version": "0.1.0",
+  "description": "مساعد محلي للسائقين في مصر لحساب الربح وتتبّع الرحلات",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "android": "npm run build && cap sync android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gogomang128-ctrl/DriveProfit.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gogomang128-ctrl/DriveProfit/issues"
+  },
+  "homepage": "https://github.com/gogomang128-ctrl/DriveProfit#readme",
+  "dependencies": {
+    "@capacitor/android": "^7.6.10",
+    "@capacitor/core": "^7.6.10",
+    "@fontsource-variable/cairo": "^5.3.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.76.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.10",
+    "vite": "^7.3.8"
+  },
+  "type": "module"
+}

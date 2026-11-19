@@ -1,0 +1,8 @@
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackVisual"
+    android:description="@string/offer_description"
+    android:packageNames="sinet.startup.inDriver"
+    android:notificationTimeout="200"
+    android:canRetrieveWindowContent="true"
+    android:isAccessibilityTool="false" />
