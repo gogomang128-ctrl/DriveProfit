@@ -176,6 +176,20 @@ try {
     await p.locator(".fuelRow.selected strong").textContent(),
     "23.00",
   );
+  await p.getByLabel("سعر الرحلة").fill("100");
+  await p.getByLabel("مسافة الرحلة").fill("10");
+  await p.getByLabel("مسافة الوصول للراكب").fill("2");
+  await p.getByRole("button", { name: "احسب صافي الربح" }).click();
+  await p.getByText(/صافي الربح المتوقع: 86.72/).waitFor();
+  await p.getByText(/صافي الكيلومتر 7.23/).waitFor();
+  for (const name of ["الإعدادات", "أسعار الوقود"]) {
+    await p.getByRole("button", { name, exact: true }).click();
+    assert.equal(
+      await p.getByRole("dialog").locator("input,select,textarea").count(),
+      0,
+    );
+    await p.keyboard.press("Escape");
+  }
   feedGood = true;
   await p.getByRole("button", { name: "تغيير المركبة" }).click();
   assert.equal(
