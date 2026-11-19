@@ -37,19 +37,26 @@ try {
   );
   let feedGood = true,
     published92 = 22.25;
-  await p.route("**/functions/v1/egypt-fuel-prices", (r) =>
-    !feedGood
-      ? r.fulfill({ status: 503, body: "unavailable" })
-      : r.fulfill({
-          json: {
-            asOf: new Date().toISOString().slice(0, 10),
-            checkedAt: new Date().toISOString(),
-            source: "https://www.petroleum.gov.eg/ar-eg/Pages/HomePage.aspx",
-            currency: "EGP",
-            prices: { 80: 20.75, 92: published92, 95: 24 },
-          },
-        }),
-  );
+  await p.route("**/rest/v1/drive_policy?**", (r) => {
+    assert.equal(r.request().method(), "GET");
+    return feedGood
+      ? r.fulfill({
+          json: [
+            {
+              price_80: 20.75,
+              price_92: published92,
+              price_95: 24,
+              effective_on: "2026-11-19",
+              wear: 5,
+              speed: 80,
+              tank: 8,
+              sound: false,
+              vehicle_overrides: { fiat_tipo_14_mt: { rate: 8, grade: 92 } },
+            },
+          ],
+        })
+      : r.fulfill({ status: 503, body: "offline" });
+  });
   const restricted = await b.newPage();
   restricted.on("pageerror", (e) => errors.push(String(e)));
   await restricted.addInitScript(() => {
@@ -123,6 +130,19 @@ try {
   await onlineMap.close();
   await restricted.close();
   await p.goto(base);
+  await p.evaluate(() =>
+    localStorage.setItem(
+      "dp.settings",
+      JSON.stringify({
+        vehicle: 0,
+        asOf: "2026-11-17",
+        updated: 123,
+        prices: { 92: 1 },
+        rate: 99,
+        wear: 90,
+      }),
+    ),
+  );
   await p.evaluate(() => document.fonts.ready);
   await p.getByLabel("اسم الكابتن").fill("اختبار تجريبي");
   await p.getByLabel("رقم الموبايل").fill("٠١٠٠٠٠٠٠٠٠٠");
@@ -132,36 +152,31 @@ try {
   assert.equal(registered, 1);
   await p.reload();
   await p.getByRole("heading", { name: "لوحة القيادة" }).waitFor();
-  await p.getByText(/آخر تحقق:/).waitFor();
-  const current92 = () =>
-    p.evaluate(
-      () => JSON.parse(localStorage.getItem("dp.settings")).prices[92],
-    );
+  await p.waitForFunction(
+    () => JSON.parse(localStorage.getItem("dp.policy.v1"))?.price_92 === 22.25,
+  );
+  assert.deepEqual(
+    await p.evaluate(() =>
+      Object.keys(JSON.parse(localStorage.getItem("dp.settings"))),
+    ),
+    ["vehicle"],
+  );
+  assert.equal(await p.getByText("2026-11-17").count(), 0);
+  assert.equal(
+    await p.getByRole("button", { name: "تعديل", exact: true }).count(),
+    0,
+  );
   published92 = 23;
   await p.evaluate(() => window.dispatchEvent(new Event("online")));
-  await p.waitForFunction(
-    () => JSON.parse(localStorage.getItem("dp.settings")).prices[92] === 23,
-  );
+  await p.locator(".fuelRow.selected strong").getByText("23.00").waitFor();
   feedGood = false;
   await p.evaluate(() => window.dispatchEvent(new Event("online")));
-  await p.getByText(/تعذّر التحديث/).waitFor();
-  assert.equal(await current92(), 23);
-  feedGood = true;
-  published92 = 22.25;
-  await p.getByRole("button", { name: "تعديل", exact: true }).click();
-  await p.getByLabel("بنزين 92").fill("25");
-  await p.getByRole("button", { name: "حفظ التغييرات" }).click();
-  await p.getByText("سعر يدوي").waitFor();
-  const refreshed = p.waitForResponse((r) =>
-    r.url().includes("/egypt-fuel-prices"),
+  await p.getByText(/نسخة محفوظة من أسعار الإدارة/).waitFor();
+  assert.equal(
+    await p.locator(".fuelRow.selected strong").textContent(),
+    "23.00",
   );
-  await p.evaluate(() => window.dispatchEvent(new Event("online")));
-  await refreshed;
-  assert.equal(await current92(), 25);
-  await p.getByRole("button", { name: "تعديل", exact: true }).click();
-  await p.getByRole("button", { name: "استعادة الأسعار المرجعية" }).click();
-  await p.getByText(/آخر تحقق:/).waitFor();
-  assert.equal(await current92(), 22.25);
+  feedGood = true;
   await p.getByRole("button", { name: "تغيير المركبة" }).click();
   assert.equal(
     await p.locator('select option[value="fiat_tipo_14_mt"]').count(),
@@ -174,19 +189,12 @@ try {
   );
   await p.getByRole("searchbox").fill("تيبو");
   await p.getByLabel("المركبة والفئة").selectOption("fiat_tipo_14_mt");
-  await p.getByRole("button", { name: /زحام/ }).click();
-  await p.getByText("معايرة الاستهلاك من تفويلتين").click();
-  await p.getByLabel("المسافة (كم)", { exact: true }).fill("300");
-  await p.getByLabel("اللترات المضافة").fill("24");
-  await p.getByRole("button", { name: /استخدام القياس/ }).click();
-  await p.getByRole("button", { name: "حفظ التغييرات" }).click();
-  assert.equal(
-    await p.evaluate(
-      () => JSON.parse(localStorage.getItem("dp.settings")).rate,
-    ),
-    8,
-  );
+  assert.equal(await p.getByRole("dialog").getByRole("spinbutton").count(), 0);
+  await p.getByRole("button", { name: "استخدم هذه المركبة" }).click();
   await p.getByRole("button", { name: "عرض الخريطة" }).click();
+  await p.getByRole("button", { name: "تجربة محاكاة" }).click();
+  await p.getByText("مسار محاكاة").waitFor();
+  await p.getByRole("button", { name: "إنهاء المحاكاة" }).click();
   await p.locator(".leaflet-container").waitFor();
   await p.getByText(/خريطة إقليمية دون إنترنت/).waitFor();
   await p.getByRole("button", { name: "تكبير الخريطة" }).click();
@@ -235,7 +243,7 @@ try {
   await p.getByRole("button", { name: "سجل الرحلات", exact: true }).click();
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    "PASS: local return, registration/deletion (mocked transport), vehicle selection/calibration, map zoom/drag/recenter, unavailable tiles, guest and mobile 360px",
+    "PASS: local return, registration/deletion (mocked transport), vehicle selection/owner policy, map zoom/drag/recenter, unavailable tiles, guest and mobile 360px",
   );
   await p.setViewportSize({ width: 1280, height: 820 });
   await p.addInitScript(() => {
@@ -271,7 +279,7 @@ try {
   assert.ok(Math.abs(saved.liters - saved.km * 0.08) < 1e-8);
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    "PASS: GPS trace and trip fuel estimate from calibrated consumption saved",
+    "PASS: GPS trace and trip fuel estimate from owner-published consumption saved",
   );
 } finally {
   await b?.close();

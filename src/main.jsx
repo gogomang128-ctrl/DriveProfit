@@ -1,5 +1,5 @@
-import { fetchPrices } from "./prices";
-import React, { useEffect, useState, useRef } from "react";
+import { bundled, fetchPolicy, settingsFor, validPolicy } from "./ownerPolicy";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/cairo";
 import {
@@ -21,7 +21,6 @@ import {
   Route,
   Wallet,
   Flag,
-  Pencil,
   Check,
   CarFront,
   SlidersHorizontal,
@@ -39,8 +38,9 @@ import {
 import Entry, { CaptainAccount, DownloadApp } from "./Entry";
 import { readProfile, persistProfile, profileRPC } from "./profile";
 import VehiclePicker from "./VehiclePicker";
-import { resolveVehicle, initial, calc } from "./engine";
+import { resolveVehicle, calc } from "./engine";
 import { native, Driver, useTracking } from "./tracking";
+import TripView from "./TripView";
 import TripMap from "./Map";
 import "./style.css";
 const nf = (n, d = 1) =>
@@ -148,13 +148,14 @@ function Field({
 }
 function CalculatorCard({ s }) {
   const [km, K] = useState("12"),
+    [pickup, P] = useState("0"),
     [fare, F] = useState("85"),
     [result, R] = useState(null);
   function run(e) {
     e.preventDefault();
-    R(calc(+km, +fare, s.rate, s.prices[s.grade], s.wear));
+    R(calc(+km + +pickup, +fare, s.rate, s.prices[s.grade], s.wear));
   }
-  useEffect(() => R(null), [km, fare, s]);
+  useEffect(() => R(null), [km, pickup, fare, s]);
   return (
     <section className="card calculator">
       <div className="cardTitle">
@@ -166,6 +167,28 @@ function CalculatorCard({ s }) {
       </div>
       <div className="calcBody">
         <p>اعرف صافي ربحك قبل قبول الرحلة.</p>
+        <details className="calibrate">
+          <summary>تجربة عروض افتراضية</summary>
+          <p>أمثلة للحاسبة فقط، لا تُحفظ في سجل الرحلات.</p>
+          {[
+            [8, 1, 75],
+            [18, 4, 85],
+            [22, 5, 15],
+          ].map(([km, p, f], i) => (
+            <button
+              className="subtle"
+              key={km}
+              onClick={() => {
+                K(String(km));
+                P(String(p));
+                F(String(f));
+                R(null);
+              }}
+            >
+              مثال {i + 1}
+            </button>
+          ))}
+        </details>
         <form onSubmit={run}>
           <div className="fields">
             <Field label="سعر الرحلة" unit="ج.م" value={fare} change={F} />
@@ -175,6 +198,12 @@ function CalculatorCard({ s }) {
               value={km}
               change={K}
               min={0.01}
+            />
+            <Field
+              label="مسافة الوصول للراكب"
+              unit="كم"
+              value={pickup}
+              change={P}
             />
           </div>
           <button className="lime full">
@@ -193,7 +222,15 @@ function CalculatorCard({ s }) {
             </b>
             <small>
               بنزين {money(result.fuel)} ج.م · صيانة{" "}
-              {money(result.cost - result.fuel)} ج.م
+              {money(result.cost - result.fuel)} ج.م · {nf(result.liters, 2)}{" "}
+              لتر تقديري · صافي الكيلومتر {money(result.net / (+km + +pickup))}{" "}
+              ج.م
+              {s.wear < 100 && (
+                <>
+                  {" "}
+                  · أجرة التعادل {money(result.fuel / (1 - s.wear / 100))} ج.م
+                </>
+              )}
             </small>
           </div>
         )}
@@ -205,7 +242,7 @@ function CalculatorCard({ s }) {
     </section>
   );
 }
-function FuelCard({ s, edit, feedState }) {
+function FuelCard({ s, feedState }) {
   return (
     <section className="card fuel">
       <div className="cardTitle">
@@ -239,17 +276,12 @@ function FuelCard({ s, edit, feedState }) {
       <div className="fuelFoot">
         <span>
           <Clock3 size={12} />
-          {s.updated
-            ? "سعر يدوي"
-            : (feedState === "offline" ? "تعذّر التحديث · " : "") +
-              (s.checkedAt
-                ? "آخر تحقق: " + new Date(s.checkedAt).toLocaleString("ar-EG")
-                : "مرجع محفوظ: " + (s.asOf || "2026-11-17"))}
+          {feedState === "ok"
+            ? "أسعار الإدارة"
+            : "نسخة محفوظة من أسعار الإدارة"}{" "}
+          · بتاريخ <bdi>{s.asOf}</bdi>
         </span>
-        <button onClick={edit}>
-          <Pencil size={12} />
-          تعديل
-        </button>
+        <small>للعرض فقط</small>
       </div>
     </section>
   );
@@ -290,12 +322,7 @@ function VehicleCard({ s, edit }) {
       <div className="heroFoot">
         <span>
           <Fuel />
-          {s.mode === "measured"
-            ? "معدل من التفويل"
-            : s.mode === "manual"
-              ? "معدل يدوي"
-              : "معدل تقديري"}{" "}
-          <b>{nf(s.rate, 2)}</b> لتر / 100 كم
+          معدل تقديري منشور <b>{nf(s.rate, 2)}</b> لتر / 100 كم
         </span>
         <i />
         <span>
@@ -384,14 +411,21 @@ function App({ profile, changeProfile, showEntry }) {
   const [page, P] = useState("dash"),
     [modal, M] = useState(""),
     [mobile, U] = useState(false),
-    [s, S] = useState(() => load("dp.settings", initial)),
-    [draft, D] = useState(s),
+    [vehicle, selectVehicle] = useState(
+      () => resolveVehicle(load("dp.settings", {})?.vehicle).id,
+    ),
+    [policy, setPolicy] = useState(() => {
+      const cached = load("dp.policy.v1", null);
+      return validPolicy(cached) ? cached : bundled;
+    }),
+    [draft, D] = useState(vehicle),
     [feedState, setFeedState] = useState("loading"),
     [list, H] = useState(() => load("dp.history", [])),
     [range, G] = useState("اليوم"),
     [fare, F] = useState(""),
     [msg, N] = useState(""),
     [alerts, A] = useState([]);
+  const s = useMemo(() => settingsFor(vehicle, policy), [vehicle, policy]);
   const tracking = useTracking(),
     { trip } = tracking;
   const [nativeNote, NN] = useState("");
@@ -405,19 +439,12 @@ function App({ profile, changeProfile, showEntry }) {
       if (document.hidden || busy) return;
       busy = true;
       try {
-        const feed = await fetchPrices();
+        const row = await fetchPolicy();
         if (!alive) return;
-        S((old) =>
-          old.updated || old.asOf > feed.asOf || old.checkedAt >= feed.checkedAt
-            ? old
-            : {
-                ...old,
-                prices: feed.prices,
-                asOf: feed.asOf,
-                source: feed.source,
-                checkedAt: feed.checkedAt,
-              },
+        setPolicy((prev) =>
+          JSON.stringify(row) === JSON.stringify(prev) ? prev : row,
         );
+        saveLocally("dp.policy.v1", row);
         setFeedState("ok");
       } catch {
         if (alive) setFeedState("offline");
@@ -447,7 +474,7 @@ function App({ profile, changeProfile, showEntry }) {
   function goto(key) {
     U(false);
     if (["vehicle", "fuel", "settings", "alerts"].includes(key)) {
-      D(JSON.parse(JSON.stringify(s)));
+      D(vehicle);
       NN("");
       M(key);
     } else {
@@ -456,7 +483,7 @@ function App({ profile, changeProfile, showEntry }) {
     }
   }
   useEffect(() => {
-    saveLocally("dp.settings", s);
+    saveLocally("dp.settings", { vehicle: s.vehicle });
     if (native)
       Driver.configure({ settings: s }).catch(() =>
         note("تعذّر تحديث إعدادات الفقاعة"),
@@ -491,55 +518,6 @@ function App({ profile, changeProfile, showEntry }) {
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, [mobile]);
-  function save(e) {
-    e.preventDefault();
-    let d = {
-      ...draft,
-      rate: +draft.rate,
-      wear: +draft.wear,
-      tank: +draft.tank,
-      speed: +draft.speed,
-      prices: Object.fromEntries(
-        Object.entries(draft.prices).map(([k, v]) => [k, +v]),
-      ),
-    };
-    S((old) =>
-      modal === "fuel"
-        ? draft.priceEdited
-          ? { ...old, prices: d.prices, updated: Date.now() }
-          : old
-        : modal === "vehicle"
-          ? {
-              ...old,
-              vehicleRates: {
-                ...old.vehicleRates,
-                [resolveVehicle(old.vehicle).id]: {
-                  rate: old.rate,
-                  mode: old.mode,
-                  grade: old.grade,
-                },
-                [resolveVehicle(d.vehicle).id]: {
-                  rate: d.rate,
-                  mode: d.mode,
-                  grade: d.grade,
-                },
-              },
-              vehicle: d.vehicle,
-              mode: d.mode,
-              rate: d.rate,
-              grade: d.grade,
-            }
-          : {
-              ...old,
-              tank: d.tank,
-              wear: d.wear,
-              sound: d.sound,
-              speed: d.speed,
-            },
-    );
-    close();
-    note("تم حفظ التعديلات");
-  }
   async function begin() {
     snap.current = JSON.parse(JSON.stringify(s));
     saveLocally("dp.snapshot", s);
@@ -719,11 +697,7 @@ function App({ profile, changeProfile, showEntry }) {
             <>
               <div className="topGrid">
                 <VehicleCard s={s} edit={() => goto("vehicle")} />
-                <FuelCard
-                  s={s}
-                  feedState={feedState}
-                  edit={() => goto("fuel")}
-                />
+                <FuelCard s={s} feedState={feedState} />
               </div>
               <Stats list={list} range={range} setRange={G} />
               <div className="sectionBar toolsTitle">
@@ -740,32 +714,15 @@ function App({ profile, changeProfile, showEntry }) {
           ) : page === "calc" ? (
             <div className="topGrid">
               <CalculatorCard s={s} />
-              <FuelCard s={s} feedState={feedState} edit={() => goto("fuel")} />
+              <FuelCard s={s} feedState={feedState} />
             </div>
           ) : page === "map" ? (
-            <>
-              <TripMap expanded trip={trip} onStart={openTrip} />
-              <div className="trackStats">
-                {[
-                  [Gauge, "السرعة", nf(trip.speed), "كم/س"],
-                  [Route, "المسافة", nf(trip.km, 2), "كم"],
-                  [
-                    Fuel,
-                    "الاستهلاك المقدّر",
-                    nf((trip.km * snap.current.rate) / 100, 2),
-                    "لتر",
-                  ],
-                ].map(([I, t, v, u]) => (
-                  <div className="card" key={t}>
-                    <I />
-                    <small>{t}</small>
-                    <b>
-                      {v} {u}
-                    </b>
-                  </div>
-                ))}
-              </div>
-            </>
+            <TripView
+              trip={trip}
+              snapshot={snap.current}
+              settings={s}
+              start={openTrip}
+            />
           ) : (
             <section className="card history">
               <div className="cardTitle">
@@ -841,158 +798,62 @@ function App({ profile, changeProfile, showEntry }) {
               change={changeProfile}
               close={close}
             />
-          ) : ["vehicle", "fuel", "settings"].includes(modal) ? (
-            <form className="formBody" onSubmit={save}>
-              {modal === "vehicle" ? (
-                <>
-                  <p>اختر مركبتك وعدّل الاستهلاك حسب تجربتك الفعلية.</p>
-                  <VehiclePicker draft={draft} D={D} />
-                  <Field
-                    label={
-                      draft.mode === "measured"
-                        ? "معدل مقاس من التفويلتين"
-                        : "معدل الاستهلاك المستخدم"
-                    }
-                    unit="لتر / 100 كم"
-                    min={0.1}
-                    max={100}
-                    value={draft.rate}
-                    change={(v) => D({ ...draft, rate: v, mode: "manual" })}
-                  />
-                  <label className="field">
-                    نوع البنزين
-                    <select
-                      value={draft.grade}
-                      onChange={(e) => D({ ...draft, grade: +e.target.value })}
-                    >
-                      {[80, 92, 95].map((g) => (
-                        <option key={g}>{g}</option>
-                      ))}
-                    </select>
-                  </label>
-                </>
-              ) : modal === "fuel" ? (
-                <>
-                  <p>
-                    أسعار مرجعية بتاريخ <bdi>{draft.asOf || "2026-11-17"}</bdi>،
-                    يفحص التطبيق المصدر كل دقيقة أثناء فتحه. التعديل اليدوي له
-                    الأولوية حتى استعادة السعر المرجعي.
-                  </p>
-                  {[80, 92, 95].map((g) => (
-                    <Field
-                      key={g}
-                      label={"بنزين " + g}
-                      unit="ج.م / لتر"
-                      min={0.01}
-                      value={draft.prices[g]}
-                      change={(v) =>
-                        D({
-                          ...draft,
-                          priceEdited: true,
-                          prices: { ...draft.prices, [g]: v },
-                        })
-                      }
-                    />
-                  ))}
-                  <a
-                    href={draft.source || "https://khalfelhadth.com/159806"}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    مصدر الأسعار المرجعية ↗
-                  </a>
+          ) : modal === "vehicle" ? (
+            <div className="formBody">
+              <p>
+                اختر مركبتك. نوع البنزين ومعدل الاستهلاك يحددهما صاحب الموقع.
+              </p>
+              <VehiclePicker vehicle={draft} choose={D} policy={policy} />
+              <button
+                className="lime full"
+                onClick={() => {
+                  selectVehicle(resolveVehicle(draft).id);
+                  close();
+                }}
+              >
+                استخدم هذه المركبة
+              </button>
+            </div>
+          ) : modal === "fuel" ? (
+            <FuelCard s={s} feedState={feedState} />
+          ) : modal === "settings" ? (
+            <div className="formBody">
+              <p>إعدادات الإدارة · للعرض فقط</p>
+              <p>
+                حد تنبيه السرعة: {s.speed} كم/س
+                <br />
+                احتياطي الصيانة: {s.wear}٪ من الأجرة
+                <br />
+                تقدير الوقود الابتدائي: {s.tank} لتر
+                <br />
+                التنبيه الصوتي: {s.sound ? "مفعّل" : "غير مفعّل"}
+              </p>
+              <div className="perm">
+                <h4>
+                  <Layers size={16} />
+                  المساعد العائم لإندرايف
+                </h4>
+                <p>
+                  {native
+                    ? "بعد تفعيل الخدمة، تُقرأ نصوص عروض إندرايف محلياً لحساب الربح فقط. لا تُحفظ نصوص الشاشة ولا يتم قبول العروض تلقائياً. يمكنك إلغاء الصلاحية من إعدادات الجهاز."
+                    : "الفقاعة وقراءة شاشة إندرايف متاحتان في نسخة أندرويد فقط. في المتصفح استخدم حاسبة الرحلة يدوياً."}
+                </p>
+                {native && (
                   <button
                     type="button"
                     className="subtle"
-                    onClick={async () => {
-                      try {
-                        const feed = await fetchPrices(s.asOf);
-                        setFeedState("ok");
-                        S((old) => ({
-                          ...old,
-                          prices: feed.prices,
-                          updated: null,
-                          source: feed.source,
-                          checkedAt: feed.checkedAt,
-                          asOf: feed.asOf,
-                        }));
-                        close();
-                        note("تمت استعادة أحدث أسعار المرجع المتاحة");
-                      } catch {
-                        note(
-                          "تعذّر تحديث الأسعار. تم الاحتفاظ بالقيم الحالية.",
-                        );
-                      }
-                    }}
+                    onClick={() =>
+                      Driver.accessibility().catch(() =>
+                        NN("تعذّر فتح إعدادات الجهاز"),
+                      )
+                    }
                   >
-                    استعادة الأسعار المرجعية
+                    فتح إعدادات إمكانية الوصول
                   </button>
-                </>
-              ) : (
-                <>
-                  <Field
-                    label="حد السرعة للتنبيه"
-                    unit="كم / س"
-                    min={5}
-                    max={200}
-                    value={draft.speed}
-                    change={(v) => D({ ...draft, speed: v })}
-                  />
-                  <Field
-                    label="احتياطي الصيانة من أجرة الرحلة"
-                    unit="٪"
-                    max={100}
-                    value={draft.wear}
-                    change={(v) => D({ ...draft, wear: v })}
-                  />
-                  <Field
-                    label="البنزين المتاح عند بدء الرحلة"
-                    unit="لتر"
-                    min={0.1}
-                    max={150}
-                    value={draft.tank}
-                    change={(v) => D({ ...draft, tank: v })}
-                  />
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      checked={draft.sound}
-                      onChange={(e) => D({ ...draft, sound: e.target.checked })}
-                    />
-                    تنبيه صوتي أثناء التتبّع
-                  </label>
-                  <div className="perm">
-                    <h4>
-                      <Layers size={16} />
-                      المساعد العائم لإندرايف
-                    </h4>
-                    <p>
-                      {native
-                        ? "بعد تفعيل الخدمة، تُقرأ نصوص عروض إندرايف محلياً لحساب الربح فقط. لا تُحفظ نصوص الشاشة ولا يتم قبول العروض تلقائياً. يمكنك إلغاء الصلاحية من إعدادات الجهاز."
-                        : "الفقاعة وقراءة شاشة إندرايف متاحتان في نسخة أندرويد فقط. في المتصفح استخدم حاسبة الرحلة يدوياً."}
-                    </p>
-                    {native && (
-                      <button
-                        type="button"
-                        className="subtle"
-                        onClick={() =>
-                          Driver.accessibility().catch(() =>
-                            NN("تعذّر فتح إعدادات الجهاز"),
-                          )
-                        }
-                      >
-                        فتح إعدادات إمكانية الوصول
-                      </button>
-                    )}
-                    {nativeNote}
-                  </div>
-                </>
-              )}
-              <button className="lime full">
-                <Check size={16} />
-                حفظ التغييرات
-              </button>
-            </form>
+                )}
+                {nativeNote}
+              </div>
+            </div>
           ) : modal === "alerts" ? (
             <div className="formBody">
               <div className="notice">
@@ -1012,7 +873,7 @@ function App({ profile, changeProfile, showEntry }) {
                 <p>لا توجد تنبيهات مسجّلة خلال هذه الجلسة.</p>
               )}
               <button className="subtle" onClick={() => goto("settings")}>
-                ضبط التنبيهات <SlidersHorizontal size={15} />
+                عرض إعدادات التنبيه <SlidersHorizontal size={15} />
               </button>
             </div>
           ) : modal === "start" ? (

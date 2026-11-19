@@ -1,29 +1,16 @@
+import { settingsFor } from "./ownerPolicy";
 import React, { useState } from "react";
 import { vehicles, resolveVehicle } from "./engine";
-export default function VehiclePicker({ draft, D }) {
-  const [query, setQuery] = useState(""),
-    [km, K] = useState(""),
-    [liters, F] = useState("");
-  const calibrated = (100 * Number(liters)) / Number(km);
-  const v = resolveVehicle(draft.vehicle);
+export default function VehiclePicker({ vehicle, choose, policy }) {
+  const [query, setQuery] = useState("");
+  const v = resolveVehicle(vehicle);
+  const settings = settingsFor(vehicle, policy);
   const norm = (t) =>
     t
       .toLowerCase()
       .normalize("NFKD")
       .replace(/[\u064B-\u065F]/g, "")
       .trim();
-  function choose(x) {
-    const saved = draft.vehicleRates?.[x.id];
-    D({
-      ...draft,
-      vehicle: x.id,
-      grade: saved?.grade ?? x.grade,
-      rate: saved?.rate ?? x.rate,
-      mode: saved?.mode ?? "mixed",
-    });
-    K("");
-    F("");
-  }
   const matches = vehicles.filter(
     (x) =>
       x.type === v.type &&
@@ -42,10 +29,8 @@ export default function VehiclePicker({ draft, D }) {
             aria-pressed={v.type === key}
             onClick={() => {
               if (v.type !== key) {
-                choose(vehicles.find((x) => x.type === key));
+                choose(vehicles.find((x) => x.type === key).id);
                 setQuery("");
-                K("");
-                F("");
               }
             }}
           >
@@ -66,10 +51,7 @@ export default function VehiclePicker({ draft, D }) {
       </label>
       <label className="field">
         المركبة والفئة
-        <select
-          value={v.id}
-          onChange={(e) => choose(resolveVehicle(e.target.value))}
-        >
+        <select value={v.id} onChange={(e) => choose(e.target.value)}>
           {!matches.includes(v) && (
             <option value={v.id}>
               {v.name} {v.model} (الحالية)
@@ -87,99 +69,18 @@ export default function VehiclePicker({ draft, D }) {
           ? `${matches.length} نتيجة`
           : "لا توجد نتيجة مطابقة؛ لم تتغير مركبتك."}
       </small>
-      {v.city && (
-        <>
-          <div className="consumptionModes">
-            {[
-              ["city", "زحام", v.city],
-              ["highway", "سفر", v.highway],
-              ["mixed", "مختلط", v.rate],
-            ].map(([key, title, rate]) => (
-              <button
-                type="button"
-                key={key}
-                className={
-                  (draft.mode || "mixed") === key && +draft.rate === rate
-                    ? "picked"
-                    : ""
-                }
-                onClick={() => D({ ...draft, rate, mode: key })}
-              >
-                {title}
-                <b>{rate.toFixed(2)}</b>
-              </button>
-            ))}
-          </div>
-          <small>
-            لتر / 100 كم · المختلط 60٪ من المسافة داخل المدينة. خزان هذه النسخة{" "}
-            {v.tank} لتر؛ لا يعني أنه ممتلئ. طابق الأوكتان مع كتيّب سيارتك.
-          </small>
-        </>
-      )}
-      <small>
-        {draft.mode === "measured"
-          ? "المعدل الحالي محسوب من بيانات تفويلك."
-          : "المعدل الحالي تقدير للتخطيط، وليس قياساً فعلياً لمركبتك."}{" "}
-        لترات الرحلة تُقدّر من المسافة، وليست قراءة من حساس الخزان.
-      </small>
+      <p>
+        بنزين {settings.grade} · {settings.rate} لتر / 100 كم ·{" "}
+        {(100 / settings.rate).toFixed(2)} كم/لتر · تكلفة البنزين{" "}
+        {((settings.rate * settings.prices[settings.grade]) / 100).toFixed(2)}{" "}
+        ج.م/كم
+      </p>
+      <small>معدل تقديري منشور لحساب الرحلات، وليس قياساً لحساس الوقود.</small>
       {v.spec && (
         <a href={v.spec.url} target="_blank" rel="noreferrer">
-          مرجع مواصفات الفئة (وليس قياس استهلاكها) ↗
+          مرجع مواصفات الفئة ↗
         </a>
       )}
-      <details className="calibrate">
-        <summary>معايرة الاستهلاك من تفويلتين</summary>
-        <p>
-          فوّل حتى نفس المستوى مرتين. أدخل المسافة بين التفويلتين واللترات
-          المضافة في الثانية؛ لا تستخدم سعة الخزان الكلية.
-        </p>
-        <div className="fields">
-          <label className="field">
-            المسافة (كم)
-            <input
-              className="textBox"
-              inputMode="decimal"
-              type="number"
-              min="0.1"
-              step="any"
-              value={km}
-              onChange={(e) => K(e.target.value)}
-            />
-          </label>
-          <label className="field">
-            اللترات المضافة
-            <input
-              className="textBox"
-              inputMode="decimal"
-              type="number"
-              min="0.01"
-              step="any"
-              value={liters}
-              onChange={(e) => F(e.target.value)}
-            />
-          </label>
-        </div>
-        <button
-          type="button"
-          className="subtle"
-          disabled={
-            !(
-              Number(km) > 0 &&
-              Number(liters) > 0 &&
-              calibrated >= 0.1 &&
-              calibrated <= 100
-            )
-          }
-          onClick={() =>
-            D({ ...draft, rate: +calibrated.toFixed(3), mode: "measured" })
-          }
-        >
-          استخدام القياس{" "}
-          {Number.isFinite(calibrated) && calibrated > 0
-            ? calibrated.toFixed(2) + " لتر / 100 كم"
-            : ""}
-        </button>
-      </details>
     </>
   );
 }

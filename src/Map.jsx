@@ -28,15 +28,17 @@ export default function TripMap({ trip, onOpen, onStart, expanded = false }) {
         </h3>
         <span className={"tag " + (trip.active ? "green" : "")}>
           <i className="dot" />
-          {trip.active
-            ? live
-              ? "تتبّع مباشر"
-              : "بانتظار GPS"
-            : live
-              ? "آخر مسار"
-              : expanded
-                ? "استكشاف الخريطة"
-                : "معاينة المسار"}
+          {trip.demo
+            ? "مسار محاكاة"
+            : trip.active
+              ? live
+                ? "تتبّع مباشر"
+                : "بانتظار GPS"
+              : live
+                ? "آخر مسار"
+                : expanded
+                  ? "استكشاف الخريطة"
+                  : "معاينة المسار"}
         </span>
       </div>
       <div className={"mapCanvas " + (expanded ? "expanded" : "")}>
@@ -107,9 +109,11 @@ export default function TripMap({ trip, onOpen, onStart, expanded = false }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {trip.point
-              ? "فتح موقعي في خرائط Google"
-              : "فتح القاهرة في خرائط Google"}{" "}
+            {trip.demo
+              ? "فتح موقع المثال في خرائط Google"
+              : trip.point
+                ? "فتح موقعي في خرائط Google"
+                : "فتح القاهرة في خرائط Google"}{" "}
             ↗
           </a>
         </div>
@@ -117,7 +121,11 @@ export default function TripMap({ trip, onOpen, onStart, expanded = false }) {
       <div className="mapfoot">
         <span>
           <Radio size={15} />
-          {trip.active ? "جارٍ تتبّع الرحلة" : "التتبّع غير نشط"}
+          {trip.demo
+            ? "محاكاة بدون GPS"
+            : trip.active
+              ? "جارٍ تتبّع الرحلة"
+              : "التتبّع غير نشط"}
         </span>
         {expanded && !trip.active && (
           <button onClick={onStart}>

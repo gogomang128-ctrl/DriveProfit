@@ -1,5 +1,5 @@
 // This is a PUBLISHABLE client key, never a service-role or database credential.
-const origin = "https://dwxsofojrfmbmmqluesq.supabase.co",
+export const origin = "https://dwxsofojrfmbmmqluesq.supabase.co",
   key = "sb_publishable_vCTG6it5a3c4JO6eexXVMg_gsAHcr3-";
 export function normalizePhone(input) {
   let n = input
